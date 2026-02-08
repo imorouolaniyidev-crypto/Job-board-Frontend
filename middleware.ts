@@ -5,8 +5,12 @@ export function middleware(request: NextRequest) {
   const token = request.cookies.get('token')?.value; // Vérification du cookie ou token
   const { pathname } = request.nextUrl;
 
-  // Rediriger vers /login si on tente d'aller sur /profile sans être connecté
-  if (pathname.startsWith('/profile') && !token) {
+  // Routes protégées
+  const protectedRoutes = ['/profile', '/applications', '/admin'];
+  const isProtectedRoute = protectedRoutes.some(route => pathname.startsWith(route));
+
+  // Rediriger vers /login si on tente d'accéder à une route protégée sans être connecté
+  if (isProtectedRoute && !token) {
     return NextResponse.redirect(new URL('/login', request.url));
   }
 
@@ -14,5 +18,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/profile/:path*', '/admin/:path*'],
+  matcher: ['/profile/:path*', '/applications/:path*', '/admin/:path*'],
 };

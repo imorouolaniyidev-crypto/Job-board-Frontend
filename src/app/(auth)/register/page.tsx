@@ -98,7 +98,7 @@ export default function RegisterPage() {
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl font-bold">Créer un compte</CardTitle>
           <CardDescription>Rejoignez la plateforme Job Board</CardDescription>
-          <p className="text-xs text-gray-500 pt-2">Déjà inscrit ? <a href="/login" className="text-blue-600 underline">Connectez-vous</a></p>
+          <p className="text-xs text-gray-500 pt-2">Déjà inscrit ? <a href="/login" className="text-[#2c3e6e] underline">Connectez-vous</a></p>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -164,7 +164,7 @@ export default function RegisterPage() {
                 onCheckedChange={(checked) => setTermsAccepted(checked as boolean)}
               />
               <Label htmlFor="terms" className="font-normal cursor-pointer">
-                J&apos;accepte les <a href="#" className="text-blue-600 underline">conditions d&apos;utilisation</a>
+                J&apos;accepte les <a href="#" className="text-[#2c3e6e] underline">conditions d&apos;utilisation</a>
               </Label>
             </div>
             {errors.terms && <p className="text-sm text-red-500">{errors.terms}</p>}

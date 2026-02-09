@@ -67,7 +67,6 @@ export default function LoginPage() {
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl font-bold">Connexion</CardTitle>
           <CardDescription>Entrez vos identifiants pour accéder à votre compte</CardDescription>
-          <p className="text-xs text-gray-500 pt-2">Pas de compte ? <a href="/register" className="text-[#2c3e6e] underline">Créez-en un</a></p>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">

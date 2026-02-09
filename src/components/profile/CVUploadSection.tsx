@@ -1,7 +1,7 @@
 'use client';
 
 import { CldUploadWidget } from 'next-cloudinary';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import { Upload, File, X } from 'lucide-react';
 
@@ -17,6 +17,12 @@ export default function CVUploadSection({
   onDelete,
 }: CVUploadSectionProps) {
   const [isLoading, setIsLoading] = useState(false);
+  const [uploadPreset, setUploadPreset] = useState<string | null>(null);
+
+  // On récupère la variable d'environnement côté client seulement
+  useEffect(() => {
+    setUploadPreset(process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || null);
+  }, []);
 
   return (
     <div className="space-y-4">
@@ -58,42 +64,38 @@ export default function CVUploadSection({
       )}
 
       {/* Upload Widget Cloudinary */}
-      <CldUploadWidget
-        uploadPreset={process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET}
-        onSuccess={(result: any) => {
-          onUpload(result.info.secure_url, result.info.original_filename);
-          toast.success('CV uploadé avec succès');
-        }}
-        onError={() => {
-          toast.error('Erreur lors de l\'upload du CV');
-        }}
-        options={{
-          resourceType: 'auto',
-          folder: 'job-board/cvs',
-        }}
-      >
-        {({ open }) => (
-          <button
-            onClick={() => {
-              if (!process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET) {
-                toast.error('Cloudinary non configuré - variables d\'env manquantes');
-                return;
-              }
-              open();
-            }}
-            disabled={isLoading}
-            className="w-full border-2 border-dashed border-gray-300 rounded-lg p-8 text-center cursor-pointer hover:border-blue-500 hover:bg-blue-50 transition-colors disabled:opacity-50"
-          >
-            <Upload className="mx-auto h-10 w-10 text-gray-400 mb-2" />
-            <p className="font-medium text-gray-700">
-              Cliquez pour uploader un CV
-            </p>
-            <p className="text-sm text-gray-600 mt-1">
-              PDF uniquement, max 10MB
-            </p>
-          </button>
-        )}
-      </CldUploadWidget>
+      {uploadPreset ? (
+        <CldUploadWidget
+          uploadPreset={uploadPreset}
+          onSuccess={(result: any) => {
+            onUpload(result.info.secure_url, result.info.original_filename);
+            toast.success('CV uploadé avec succès');
+          }}
+          onError={() => toast.error("Erreur lors de l'upload du CV")}
+          options={{
+            resourceType: 'auto',
+            folder: 'job-board/cvs',
+          }}
+        >
+          {({ open }) => (
+            <button
+              onClick={() => {
+                open();
+              }}
+              disabled={isLoading}
+              className="w-full border-2 border-dashed border-gray-300 rounded-lg p-8 text-center cursor-pointer hover:border-blue-500 hover:bg-blue-50 transition-colors disabled:opacity-50"
+            >
+              <Upload className="mx-auto h-10 w-10 text-gray-400 mb-2" />
+              <p className="font-medium text-gray-700">Cliquez pour uploader un CV</p>
+              <p className="text-sm text-gray-600 mt-1">PDF uniquement, max 10MB</p>
+            </button>
+          )}
+        </CldUploadWidget>
+      ) : (
+        <p className="text-red-600 text-sm">
+          Cloudinary non configuré - variable d'environnement manquante
+        </p>
+      )}
     </div>
   );
 }

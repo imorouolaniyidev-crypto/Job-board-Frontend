@@ -1,53 +1,146 @@
-export type Job = {
-	id: string;
-	title: string;
-	companyName: string;
-	location: string;
-	type: string;
-	createdAt: string;
-	salary?: string;
-	featured?: boolean;
-	tags?: string[];
-	description?: string;
-};
+import { Job, JobStatus, JobType, WorkMode } from './types';
 
-const mockJobs: Job[] = [
+export const mockJobs: Job[] = [
 	{
 		id: '1',
-		title: 'Développeur·se Frontend React',
-		companyName: 'TechNova',
-		location: 'Paris, France',
-		type: 'CDI',
-		createdAt: new Date().toISOString(),
+		title: 'Développeur React Senior',
+		company: 'TechNova',
+		description: 'Nous recherchons un développeur React expérimenté pour rejoindre notre équipe produit. Vous travaillerez sur des features complexes et des optimisations de performance.',
+		requirements: ['React', 'TypeScript', 'Tailwind CSS', '5+ ans expérience'],
 		salary: '45k€ - 55k€',
-		featured: true,
-		tags: ['React', 'TypeScript', 'Tailwind'],
-		description: 'Contribuez au développement de notre plateforme B2B en React et TypeScript.',
+		location: 'Paris, France',
+		jobType: 'CDI',
+		workMode: 'REMOTE',
+		status: 'PUBLISHED',
+		createdBy: 'admin@techonova.com',
+		createdAt: '2026-01-15T10:00:00Z',
+		updatedAt: '2026-02-08T14:30:00Z',
+		applicationsCount: 12,
 	},
 	{
 		id: '2',
-		title: 'Data Analyst',
-		companyName: 'DataCorp',
+		title: 'Développeur TypeScript Backend',
+		company: 'DevHub',
+		description: 'Rejoignez notre équipe backend pour développer des APIs performantes et scalables avec Node.js et TypeScript.',
+		requirements: ['Node.js', 'TypeScript', 'PostgreSQL', 'Docker', '4+ ans expérience'],
+		salary: '40k€ - 50k€',
 		location: 'Lyon, France',
-		type: 'CDD',
-		createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 7).toISOString(),
-		salary: '35k€ - 45k€',
-		featured: false,
-		tags: ['SQL', 'Python', 'BI'],
-		description: 'Analysez et valorisez les données produit pour améliorer la prise de décision.',
+		jobType: 'CDI',
+		workMode: 'HYBRID',
+		status: 'PUBLISHED',
+		createdBy: 'admin@devhub.com',
+		createdAt: '2026-01-20T09:00:00Z',
+		updatedAt: '2026-02-07T11:15:00Z',
+		applicationsCount: 8,
 	},
 	{
 		id: '3',
-		title: 'Product Manager',
-		companyName: 'BrightApps',
+		title: 'Designer UX/UI Junior',
+		company: 'CreativeStudio',
+		description: 'Cadre apprentissage - Rejoignez notre équipe design pour créer des interfaces utilisateur magnifiques et intuitives.',
+		requirements: ['Figma', 'UI/UX', 'Design thinking', 'Communication'],
+		salary: '20k€ - 25k€',
+		location: 'Toulouse, France',
+		jobType: 'STAGE',
+		workMode: 'ON_SITE',
+		status: 'PUBLISHED',
+		createdBy: 'admin@creativestudio.com',
+		createdAt: '2026-02-01T08:30:00Z',
+		updatedAt: '2026-02-05T16:45:00Z',
+		applicationsCount: 5,
+	},
+	{
+		id: '4',
+		title: 'Full Stack Developer',
+		company: 'WebScale',
+		description: 'Nous recherchons un développeur polyvalent pour travailler sur l\'ensemble de la stack (React + Node.js). Vous serez responsable du développement de features end-to-end.',
+		requirements: ['React', 'Node.js', 'PostgreSQL', 'AWS', '6+ ans expérience'],
+		salary: '50k€ - 65k€',
+		location: 'Bordeaux, France',
+		jobType: 'CDI',
+		workMode: 'HYBRID',
+		status: 'PUBLISHED',
+		createdBy: 'admin@webscale.com',
+		createdAt: '2026-01-28T13:20:00Z',
+		updatedAt: '2026-02-06T10:00:00Z',
+		applicationsCount: 15,
+	},
+	{
+		id: '5',
+		title: 'DevOps Engineer',
+		company: 'CloudOps',
+		description: 'Rejoignez notre équipe infrastructure pour gérer et optimiser notre environnement cloud. Expérience AWS/GCP requise.',
+		requirements: ['Kubernetes', 'Docker', 'AWS/GCP', 'Terraform', '5+ ans expérience'],
+		salary: '48k€ - 60k€',
 		location: 'Télétravail',
-		type: 'CDI',
-		createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 30).toISOString(),
+		jobType: 'CDI',
+		workMode: 'REMOTE',
+		status: 'DRAFT',
+		createdBy: 'admin@cloudops.com',
+		createdAt: '2026-02-08T15:00:00Z',
+		updatedAt: '2026-02-08T15:00:00Z',
+		applicationsCount: 0,
+	},
+	{
+		id: '6',
+		title: 'Product Manager',
+		company: 'InnovateCorp',
+		description: 'Pilotez la stratégie produit de notre plateforme. Vous travaillerez avec les équipes design, engineering et marketing.',
+		requirements: ['Product strategy', 'Agile', 'Analytics', 'Communication', '5+ ans expérience'],
 		salary: '60k€ - 75k€',
-		featured: false,
-		tags: ['Gestion produit', 'Agile'],
-		description: 'Pilotez la roadmap produit et travaillez avec les équipes techniques et design.',
+		location: 'Montpellier, France',
+		jobType: 'CDI',
+		workMode: 'ON_SITE',
+		status: 'CLOSED',
+		createdBy: 'admin@innovatecorp.com',
+		createdAt: '2025-12-15T10:00:00Z',
+		updatedAt: '2026-02-03T09:30:00Z',
+		applicationsCount: 25,
+	},
+	{
+		id: '7',
+		title: 'Développeur Python Data',
+		company: 'DataMasters',
+		description: 'Contrat court-terme pour développer des scripts de traitement de données. Mission 2-3 mois.',
+		requirements: ['Python', 'Pandas', 'Scikit-learn', 'SQL'],
+		salary: '35k€ - 45k€',
+		location: 'Télétravail',
+		jobType: 'CDD',
+		workMode: 'REMOTE',
+		status: 'PUBLISHED',
+		createdBy: 'admin@datamasters.com',
+		createdAt: '2026-02-04T11:00:00Z',
+		updatedAt: '2026-02-07T14:45:00Z',
+		applicationsCount: 3,
+	},
+	{
+		id: '8',
+		title: 'QA Engineer',
+		company: 'QualityFirst',
+		description: 'Testeur automation - Développez et maintenez notre suite de tests automation Cypress et Playwright.',
+		requirements: ['Cypress', 'Playwright', 'JavaScript', 'Tests automation', '3+ ans expérience'],
+		salary: '32k€ - 40k€',
+		location: 'Nantes, France',
+		jobType: 'CDI',
+		workMode: 'HYBRID',
+		status: 'ARCHIVED',
+		createdBy: 'admin@qualityfirst.com',
+		createdAt: '2025-11-01T09:00:00Z',
+		updatedAt: '2026-02-01T12:00:00Z',
+		applicationsCount: 18,
 	},
 ];
+
+export function getJobsByStatus(status: JobStatus): Job[] {
+	return mockJobs.filter(job => job.status === status);
+}
+
+export function getJobById(id: string): Job | undefined {
+	return mockJobs.find(job => job.id === id);
+}
+
+export function countJobsByType(type: JobType): number {
+	return mockJobs.filter(job => job.jobType === type).length;
+}
 
 export default mockJobs;

@@ -10,21 +10,22 @@ export const api = axios.create({
 });
 
 // Intercepteur response : gestion des erreurs d'authentification
-api.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    // Si 401 (token invalide ou expiré), déconnexion automatique
-    if (error.response?.status === 401) {
-      if (typeof window !== 'undefined') {
-        // Clear l'état utilisateur
-        useAuthStore.getState().logout();
-        // Redirection vers login
-        window.location.href = '/login';
-      }
-    }
-    return Promise.reject(error);
-  }
-);
+// DÉSACTIVÉ POUR TESTS - À RÉACTIVER EN PRODUCTION
+// api.interceptors.response.use(
+//   (response) => response,
+//   (error) => {
+//     // Si 401 (token invalide ou expiré), déconnexion automatique
+//     if (error.response?.status === 401) {
+//       if (typeof window !== 'undefined') {
+//         // Clear l'état utilisateur
+//         useAuthStore.getState().logout();
+//         // Redirection vers login
+//         window.location.href = '/login';
+//       }
+//     }
+//     return Promise.reject(error);
+//   }
+// );
 
 export default api;
 

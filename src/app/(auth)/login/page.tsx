@@ -27,11 +27,12 @@ export default function LoginPage() {
     const email = formData.get("email") as string;
     const password = formData.get("password") as string;
 
-    if (!email) newErrors.email = "L'email est requis";
-    if (!password) newErrors.password = "Le mot de passe est requis";
+    if (!email) newErrors.email = "Veuillez entrer votre email";
+    if (!password) newErrors.password = "Veuillez entrer votre mot de passe";
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
+    
       setLoading(false);
       return;
     }
@@ -69,7 +70,7 @@ export default function LoginPage() {
           <CardDescription>Entrez vos identifiants pour accéder à votre compte</CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-4"noValidate>
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input 

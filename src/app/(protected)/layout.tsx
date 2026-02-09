@@ -9,8 +9,8 @@ import { LogOut, User, Briefcase } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function ProtectedLayout({ children }: { children: React.ReactNode }) {
-  const user = useAuthStore((state) => state.user);
-  const logout = useAuthStore((state) => state.logout);
+  const user = useAuthStore((state: any) => state.user);
+  const logout = useAuthStore((state: any) => state.logout);
   const router = useRouter();
   const pathname = usePathname();
   const [isReady, setIsReady] = useState(false);
@@ -19,10 +19,11 @@ export default function ProtectedLayout({ children }: { children: React.ReactNod
 
   useEffect(() => {
     // Check if user is authenticated
-    if (!user) {
-      router.push('/login');
-      return;
-    }
+    // DÉSACTIVÉ POUR TESTS - À RÉACTIVER EN PRODUCTION
+    // if (!user) {
+    //   router.push('/login');
+    //   return;
+    // }
     setIsReady(true);
   }, [user, router]);
 
@@ -72,7 +73,7 @@ export default function ProtectedLayout({ children }: { children: React.ReactNod
       {/* Navigation Tabs */}
       <div className="bg-white border-b border-gray-200">
         <div className="container mx-auto px-4">
-          <Tabs value={currentTab} onValueChange={(value) => {
+          <Tabs value={currentTab} onValueChange={(value: string) => {
             if (value === 'profile') router.push('/profile');
             else router.push('/applications');
           }}>

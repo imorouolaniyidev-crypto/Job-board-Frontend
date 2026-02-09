@@ -36,22 +36,24 @@ export default function JobCard({ job }: { job: any }) {
             <div className="flex flex-col items-end gap-2">
               <Link href={`/jobs/${job.id}`} className="text-sm text-primary">Voir</Link>
               {job.salary ? (
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-20">
                   <div className="text-orange-500 font-semibold text-lg">{job.salary}</div>
                   {isValidUrl(source) ? (
                     <a href={source} target="_blank" rel="noopener noreferrer" className="inline-block text-sm bg-orange-500 text-white px-3 py-1 rounded hover:opacity-90">Postuler</a>
                   ) : (
-                    <button disabled className="inline-block text-sm bg-gray-100 text-muted-foreground px-3 py-1 rounded">Postuler</button>
+                    <button disabled className="inline-block text-sm bg-orange-500 text-white px-3 py-1 rounded">Postuler</button>
                   )}
                 </div>
               ) : null}
             </div>
           </div>
         </div>
+<div className="mt-4 flex items-center justify-between">
 
         {job.description ? (
           <p className="mt-3 text-sm text-muted-foreground line-clamp-3">{stripHtml(job.description).slice(0, 240)}{job.description && job.description.length > 240 ? '…' : ''}</p>
         ) : null}
+</div>
 
         <div className="mt-4 flex items-center justify-between">
           <div className="flex items-center gap-2 text-sm text-muted-foreground flex-wrap">
@@ -61,6 +63,9 @@ export default function JobCard({ job }: { job: any }) {
           </div>
           <div className="text-sm text-muted-foreground">{createdAt ? formatDate(createdAt) : ''}</div>
         </div>
+
+
+
       </div>
       {job.featured ? (
         <div className="absolute top-0 right-0 -translate-y-1/2 translate-x-4 bg-orange-500 text-white text-xs px-3 py-1 rounded rotate-12">En vedette</div>

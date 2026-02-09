@@ -98,7 +98,6 @@ export default function RegisterPage() {
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl font-bold">Créer un compte</CardTitle>
           <CardDescription>Rejoignez la plateforme Job Board</CardDescription>
-          <p className="text-xs text-gray-500 pt-2">Déjà inscrit ? <a href="/login" className="text-[#2c3e6e] underline">Connectez-vous</a></p>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -141,21 +140,6 @@ export default function RegisterPage() {
               {errors.confirmPassword && <p className="text-sm text-red-500">{errors.confirmPassword}</p>}
             </div>
 
-            <div className="space-y-2">
-              <Label>Vous êtes ?</Label>
-              <Select
-                value={role}
-                onValueChange={(value: "ADMIN" | "CANDIDATE") => setRole(value)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Sélectionnez un rôle" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="CANDIDATE">Candidat</SelectItem>
-                  <SelectItem value="ADMIN">Recruteur (Admin)</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
 
             <div className="flex items-center space-x-2">
               <Checkbox

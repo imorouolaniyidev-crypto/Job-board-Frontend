@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { useAuthStore } from './store';
-import { Candidate, Application, ApplicationStatus } from './types';
+import { Candidate, Application, ApplicationStatus, DashboardStats, Job } from './types';
 
 export const api = axios.create({
   // Utilise l'URL définie dans .env.local ou localhost par défaut
@@ -89,5 +89,42 @@ export const applicationsApi = {
   ): Promise<Application> => {
     const response = await api.patch(`/applications/${applicationId}`, { status });
     return response.data;
+  },
+};
+
+// ============================================
+// ADMIN API ENDPOINTS
+// ============================================
+
+export const adminApi = {
+  // Dashboard Statistics
+  getDashboardStats: async (): Promise<DashboardStats> => {
+    const response = await api.get('/admin/dashboard/stats');
+    return response.data;
+  },
+
+  // Jobs Management
+  getJobs: async (page?: number, limit?: number): Promise<{ data: Job[]; total: number }> => {
+    const response = await api.get('/admin/jobs', { params: { page, limit } });
+    return response.data;
+  },
+
+  getJob: async (jobId: string): Promise<Job> => {
+    const response = await api.get(`/admin/jobs/${jobId}`);
+    return response.data;
+  },
+
+  createJob: async (data: Omit<Job, 'id' | 'createdAt' | 'updatedAt' | 'createdBy'>): Promise<Job> => {
+    const response = await api.post('/admin/jobs', data);
+    return response.data;
+  },
+
+  updateJob: async (jobId: string, data: Partial<Job>): Promise<Job> => {
+    const response = await api.put(`/admin/jobs/${jobId}`, data);
+    return response.data;
+  },
+
+  deleteJob: async (jobId: string): Promise<void> => {
+    await api.delete(`/admin/jobs/${jobId}`);
   },
 };

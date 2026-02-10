@@ -1,6 +1,8 @@
 // Types pour le système de candidature au job board
 
+// Types pour le profil candidat
 export type ApplicationStatus = 'PENDING' | 'IN_PROGRESS' | 'ACCEPTED' | 'REJECTED';
+export type CandidateStatus = 'ACTIVE' | 'REVIEWING' | 'REJECTED';
 
 // Profil utilisateur (champs texte simples)
 export interface UserProfile {
@@ -28,7 +30,7 @@ export interface Application {
   updated_at: string;
 }
 
-// User (ancien Candidate - gardé pour compatibilité)
+// User (ancien Candidate)
 export interface Candidate {
   id: string;
   email: string;
@@ -38,12 +40,89 @@ export interface Candidate {
   skills?: string[];
   experience?: string;
   cvUrl?: string;
-  createdAt?: string;
-  updatedAt?: string;
+  status: CandidateStatus;
+  createdAt: string;
+  updatedAt: string;
+  applicationsCount?: number;
 }
 
 export interface User {
   id: string;
   email: string;
   role: 'ADMIN' | 'CANDIDATE';
+}
+
+// ============================================
+// ADMIN - JOBS
+// ============================================
+
+export type JobType = 'CDI' | 'CDD' | 'STAGE';
+export type WorkMode = 'REMOTE' | 'ON_SITE' | 'HYBRID';
+export type JobStatus = 'DRAFT' | 'PUBLISHED' | 'CLOSED' | 'ARCHIVED';
+
+export interface Job {
+  id: string;
+  title: string;
+  company: string;
+  description: string;
+  requirements: string[];
+  salary?: string;
+  location: string;
+  jobType: JobType;
+  workMode: WorkMode;
+  status: JobStatus;
+  createdBy: string;
+  createdAt: string;
+  updatedAt: string;
+  applicationsCount?: number;
+}
+
+// ============================================
+// ADMIN - DASHBOARD STATISTICS
+// ============================================
+
+export interface ApplicationsByStatus {
+  PENDING: number;
+  IN_PROGRESS: number;
+  ACCEPTED: number;
+  REJECTED: number;
+}
+
+export interface DashboardStats {
+  totalUsers: number;
+  totalCandidates: number;
+  totalAdmins: number;
+  totalJobs: number;
+  activeJobs: number;
+  totalApplications: number;
+  applicationsByStatus: ApplicationsByStatus;
+  jobsPostedThisMonth: number;
+  applicationsThisMonth: number;
+  averageApplicationsPerJob: number;
+}
+
+export interface StatisticCard {
+  label: string;
+  value: number;
+  icon: string;
+  trend?: number;
+  color: 'blue' | 'green' | 'red' | 'purple' | 'orange' | 'cyan';
+}
+
+// ============================================
+// ADMIN - CANDIDATES APPLICATIONS
+// ============================================
+
+export interface ApplicationDetail {
+  id: string;
+  candidateName: string;
+  candidateEmail: string;
+  candidatePhone?: string;
+  jobId: string;
+  jobTitle: string;
+  status: ApplicationStatus;
+  applicationDate: string;
+  cvUrl?: string;
+  notes?: string;
+  lastStatusUpdate: string;
 }

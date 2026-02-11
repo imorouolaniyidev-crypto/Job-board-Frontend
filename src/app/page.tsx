@@ -1,5 +1,5 @@
 "use client";
-
+import { useEffect } from "react";
 import React from "react";
 import JobListClient from "@/components/jobs/JobListClient";
 import JobFilters from "@/components/jobs/JobFilters";
@@ -11,6 +11,11 @@ import { useAuthStore } from "@/lib/store";
 export default function JobsPage() {
   const jobs = mockJobs;
   const user = useAuthStore((state) => state.user);
+  const fetchMe = useAuthStore((state) => state.fetchMe);
+
+  useEffect(() => {
+    fetchMe();
+  }, []);
 
   return (
     <div className="min-h-screen bg-gray-50">

@@ -4,11 +4,9 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { LayoutDashboard, Briefcase, Users, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useAuthStore } from '@/lib/store';
 
 export default function AdminSidebar() {
   const pathname = usePathname();
-  const { logout } = useAuthStore();
 
   const menuItems = [
     {
@@ -30,9 +28,12 @@ export default function AdminSidebar() {
 
   const isActive = (href: string) => pathname.startsWith(href);
 
-  const handleLogout = () => {
-    logout();
-    window.location.href = '/login';
+  const handleLogout = async () => {
+    try {
+      await fetch('/api/admin-auth/logout', { method: 'POST' });
+    } finally {
+      window.location.href = '/admin/login';
+    }
   };
 
   return (

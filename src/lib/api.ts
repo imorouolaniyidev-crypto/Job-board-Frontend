@@ -1,5 +1,4 @@
 import axios from 'axios';
-import { useAuthStore } from './store';
 import { Candidate, Application, ApplicationStatus, DashboardStats, Job } from './types';
 
 export const api = axios.create({
@@ -28,6 +27,40 @@ export const api = axios.create({
 // );
 
 export default api;
+
+function normalizeCollectionPayload<T>(payload: unknown): T[] {
+  if (Array.isArray(payload)) {
+    return payload as T[];
+  }
+
+  if (payload && typeof payload === 'object') {
+    const record = payload as Record<string, unknown>;
+    const candidates = [record.data, record.jobs, record.items];
+
+    for (const candidate of candidates) {
+      if (Array.isArray(candidate)) {
+        return candidate as T[];
+      }
+    }
+  }
+
+  return [];
+}
+
+function normalizeEntityPayload<T>(payload: unknown): T | null {
+  if (payload && typeof payload === 'object') {
+    const record = payload as Record<string, unknown>;
+    if (record.data && typeof record.data === 'object') {
+      return record.data as T;
+    }
+  }
+
+  if (payload && typeof payload === 'object') {
+    return payload as T;
+  }
+
+  return null;
+}
 
 // ============================================
 // CANDIDATE PROFILE API ENDPOINTS
@@ -89,6 +122,38 @@ export const applicationsApi = {
   ): Promise<Application> => {
     const response = await api.patch(`/applications/${applicationId}`, { status });
     return response.data;
+  },
+};
+
+// ============================================
+// PUBLIC JOBS API ENDPOINTS
+// ============================================
+
+export const jobsApi = {
+  getJobs: async (): Promise<Job[]> => {
+    const response = await api.get('/jobs');
+    return normalizeCollectionPayload<Job>(response.data);
+  },
+
+  getJob: async (jobId: string): Promise<Job | null> => {
+    try {
+      const response = await api.get(`/job/${jobId}`);
+      return normalizeEntityPayload<Job>(response.data);
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response?.status !== 404) {
+        throw error;
+      }
+    }
+
+    try {
+      const response = await api.get(`/jobs/${jobId}`);
+      return normalizeEntityPayload<Job>(response.data);
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response?.status === 404) {
+        return null;
+      }
+      throw error;
+    }
   },
 };
 

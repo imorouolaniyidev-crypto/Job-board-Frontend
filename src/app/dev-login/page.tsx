@@ -71,21 +71,6 @@ export default function TestLoginPage() {
             />
           </div>
 
-          {/* Role */}
-          <div className="space-y-2">
-            <Label htmlFor="role">Rôle</Label>
-            <select
-              id="role"
-              value={role}
-              onChange={(e) => setRole(e.target.value)}
-              disabled={isLoading}
-              className="w-full rounded-md border border-gray-300 px-3 py-2 dark:bg-gray-700 dark:border-gray-600"
-            >
-              <option value="ADMIN">👨‍💼 ADMIN</option>
-              <option value="CANDIDATE">👤 CANDIDATE</option>
-            </select>
-          </div>
-
           {/* Submit Button */}
           <Button
             type="submit"

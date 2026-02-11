@@ -44,7 +44,7 @@ export default function LoginPage() {
       setAuth(response.data.user);
       
       toast.success("Connexion réussie !");
-      router.push("/jobs");
+      router.push("/");
     } catch (error: unknown) {
       if (axios.isAxiosError(error)) {
         if (error.response?.status === 401) {

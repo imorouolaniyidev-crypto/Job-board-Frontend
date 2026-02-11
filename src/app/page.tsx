@@ -1,11 +1,16 @@
+"use client";
+
 import React from "react";
 import JobListClient from "@/components/jobs/JobListClient";
 import JobFilters from "@/components/jobs/JobFilters";
 import mockJobs from "@/lib/mockJobs";
 import Link from "next/link";
+import LoginPage from "@/app/(auth)/login/page";
+import { useAuthStore } from "@/lib/store";
 
 export default function JobsPage() {
   const jobs = mockJobs;
+  const user = useAuthStore((state) => state.user);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -19,7 +24,16 @@ export default function JobsPage() {
             <a href="/" className="hover:underline cursor-pointer">Accueil</a>
             <a href="/" className="hover:underline cursor-pointer">Offres</a>
             <a href="/candidats" className="hover:underline cursor-pointer">Candidats</a>
-            <a href="/login" className="hover:underline cursor-pointer">Se connecter</a>
+            {user ? (
+              <a href="/profile" className="hover:underline cursor-pointer">
+                Mon Profil
+              </a>
+            ) : (
+              <a href="/login" className="hover:underline cursor-pointer">
+                Se connecter
+              </a>
+            )}
+
           </ul>
         </div>
       </nav>

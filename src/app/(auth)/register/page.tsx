@@ -38,7 +38,6 @@ export default function RegisterPage() {
     const formData = new FormData(e.currentTarget);
     const email = formData.get("email") as string;
     const password = formData.get("password") as string;
-    const confirmPassword = formData.get("confirmPassword") as string;
 
     // Validations côté client
     if (!email) {
@@ -49,9 +48,6 @@ export default function RegisterPage() {
     } else {
       const passwordError = validatePassword(password);
       if (passwordError) newErrors.password = passwordError;
-    }
-    if (password !== confirmPassword) {
-      newErrors.confirmPassword = "Les mots de passe ne correspondent pas";
     }
     if (!termsAccepted) {
       newErrors.terms = "Vous devez accepter les conditions d'utilisation";
@@ -126,20 +122,6 @@ export default function RegisterPage() {
               />
               {errors.password && <p className="text-sm text-red-500">{errors.password}</p>}
             </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="confirmPassword">Confirmer le mot de passe</Label>
-              <Input
-                id="confirmPassword"
-                name="confirmPassword"
-                type="password"
-                placeholder="Confirmez le mot de passe"
-                required
-                className={errors.confirmPassword ? "border-red-500" : ""}
-              />
-              {errors.confirmPassword && <p className="text-sm text-red-500">{errors.confirmPassword}</p>}
-            </div>
-
 
             <div className="flex items-center space-x-2">
               <Checkbox

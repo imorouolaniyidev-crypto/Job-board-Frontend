@@ -1,134 +1,155 @@
 'use client';
+
 import Link from 'next/link';
 import React from 'react';
+import { BriefcaseBusiness, Building2, CalendarDays, FileText, MapPin } from 'lucide-react';
 
-export default function JobCard({ job }: { job: any }) {
+type JobCardData = {
+  id: string;
+  title?: string;
+  description?: string;
+  location?: string;
+  salary?: string;
+  featured?: boolean;
+  company?: string;
+  company_name?: string;
+  companyName?: string;
+  company_logo?: string;
+  companyLogo?: string;
+  created_at?: string;
+  createdAt?: string;
+  created?: string;
+  source?: string;
+  applyUrl?: string;
+  apply_url?: string;
+  type?: string;
+  jobType?: string;
+};
+
+export default function JobCard({ job }: { job: JobCardData }) {
   const companyName = job.company_name || job.companyName || job.company || '';
   const logo = job.company_logo || job.companyLogo || null;
   const createdAt = job.created_at || job.createdAt || job.created || null;
   const source = job.source || job.applyUrl || job.apply_url || null;
+  const contractType = job.type || job.jobType || '';
+  const description = getDescriptionText(job);
+  const extraDetails = getAdditionalDetails(job);
 
   return (
-    <article className={`relative flex flex-col md:flex-row gap-6 p-6 bg-white shadow-sm overflow-hidden ${job.featured}`}>
-      {/* Logo */}
-      <div className="flex-shrink-0 w-16 h-16 rounded-md bg-muted flex items-center justify-center text-xl font-bold text-card-foreground">
-        {logo ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={logo} alt={`${companyName} logo`} className="w-16 h-16 object-cover rounded-md" />
-        ) : (
-          <div className="w-16 h-16 rounded-md flex items-center justify-center">
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
-              <rect x="3" y="3" width="18" height="18" rx="4" fill="#E6F0FF" />
-              <path d="M7 11H17" stroke="#2563EB" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-              <path d="M7 7H11" stroke="#2563EB" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-              <path d="M7 15H13" stroke="#2563EB" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </div>
-        )}
-      </div>
-
-      {/* Contenu principal */}
-      <div className="flex-1">
-        {/* Titre du job - resté inchangé */}
-        <h3 className="text-xl font-bold text-gray-900 mb-2">
-          <Link href={`/jobs/${job.id}`}>{job.title}</Link>
-        </h3>
-
-        {/* Liste des informations avec icônes */}
-        <ul className="space-y-3 mb-6">
-          {/* Entreprise */}
-          {companyName && (
-            <li className="flex items-center gap-2 text-gray-700">
-              <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
-              </svg>
-              <span className="text-sm">{companyName}</span>
-            </li>
-          )}
-
-          {/* Localisation */}
-          {job.location && (
-            <li className="flex items-center gap-2 text-gray-700">
-              <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
-              </svg>
-              <span className="text-sm">{job.location}</span>
-            </li>
-          )}
-
-          {/* Type de contrat */}
-          {job.type && (
-            <li className="flex items-center gap-2 text-gray-700">
-              <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-              </svg>
-              <span className="text-sm">{job.type}</span>
-            </li>
-          )}
-
-          {/* Date de publication */}
-          {createdAt && (
-            <li className="flex items-center gap-2 text-gray-700">
-              <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-              </svg>
-              <span className="text-sm">{formatDate(createdAt)}</span>
-            </li>
-          )}
-        </ul>
-
-        {/* Tags */}
-        {job.tags && job.tags.length > 0 && (
-          <div className="flex flex-wrap gap-2 mb-6">
-            {job.tags.map((t: string) => (
-              <span key={t} className="px-3 py-1 bg-[#bed8f7] text-[#4a90e2] rounded-full text-sm">
-                {t}
-              </span>
-            ))}
-          </div>
-        )}
-
-        {/* Description réduite */}
-        {job.description && (
-          <p className="mb-6 text-sm text-gray-600 line-clamp-3">
-            {stripHtml(job.description).slice(0, 240)}
-            {job.description && stripHtml(job.description).length > 240 ? '…' : ''}
-          </p>
-        )}
-
-        {/* Boutons centrés en bas */}
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4 border-t border-gray-100">
-          <Link 
-            href={`/jobs/${job.id}`} 
-            className="px-6 py-2 text-sm bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors"
-          >
-            Voir les détails
-          </Link>
-          
-          {isValidUrl(source) ? (
-            <a 
-              href={source} 
-              target="_blank" 
-              rel="noopener noreferrer" 
-              className="px-6 py-2 text-sm bg-orange-500 text-white rounded-md hover:bg-orange-600 transition-colors"
-            >
-              Postuler maintenant
-            </a>
+    <article
+      className={`relative overflow-hidden rounded-xl border bg-white p-6 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg ${
+        job.featured ? 'border-orange-200' : 'border-gray-100'
+      }`}
+    >
+      <div className="flex flex-col gap-5 md:flex-row">
+        <div className="h-16 w-16 flex-shrink-0 rounded-lg bg-muted flex items-center justify-center text-xl font-bold text-card-foreground">
+          {logo ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={logo} alt={`${companyName} logo`} className="h-16 w-16 rounded-lg object-cover" />
           ) : (
-            <button 
-              disabled 
-              className="px-6 py-2 text-sm bg-orange-500 text-white rounded-md cursor-not-allowed"
-            >
-              Postuler
-            </button>
+            <div className="h-16 w-16 rounded-lg flex items-center justify-center">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
+                <rect x="3" y="3" width="18" height="18" rx="4" fill="#E6F0FF" />
+                <path d="M7 11H17" stroke="#2563EB" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M7 7H11" stroke="#2563EB" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M7 15H13" stroke="#2563EB" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </div>
           )}
+        </div>
+
+        <div className="flex flex-1 flex-col">
+          <h3 className="mb-1 text-xl font-bold text-[#1e3a8a]">
+            <Link href={`/jobs/${job.id}`} className="transition-colors hover:text-[#1d4ed8]">
+              {job.title}
+            </Link>
+          </h3>
+
+          <ul className="mb-6 list-disc space-y-2 pl-5 text-sm text-gray-700">
+            <li>
+              <span className="inline-flex items-center gap-2">
+                <Building2 size={16} className="text-slate-500" />
+                <span>{companyName || 'Non disponible'}</span>
+              </span>
+            </li>
+            <li>
+              <span className="inline-flex items-start gap-2">
+                <FileText size={16} className="mt-0.5 text-slate-500" />
+                <span>
+                  {description
+                    ? `${stripHtml(description).slice(0, 240)}${stripHtml(description).length > 240 ? '...' : ''}`
+                    : 'Description non disponible pour cette offre.'}
+                </span>
+              </span>
+            </li>
+            <li>
+              <span className="inline-flex items-center gap-2">
+                <MapPin size={16} className="text-slate-500" />
+                <span>{job.location || 'Non disponible'}</span>
+              </span>
+            </li>
+            <li>
+              <span className="inline-flex items-center gap-2">
+                <BriefcaseBusiness size={16} className="text-slate-500" />
+                <span>{contractType || 'Non disponible'}</span>
+              </span>
+            </li>
+          </ul>
+
+          {extraDetails.length > 0 ? (
+            <ul className="mb-6 list-disc space-y-1 pl-5 text-sm text-gray-700">
+              {extraDetails.map((detail) => (
+                <li key={detail.label}>
+                  <span className="font-semibold text-slate-800">{detail.label}:</span> {detail.value}
+                </li>
+              ))}
+            </ul>
+          ) : null}
+
+          <div className="mt-auto border-t border-gray-100 pt-4">
+            <div className="grid gap-3 sm:grid-cols-3 sm:items-center">
+              <div />
+              <div className="flex justify-center">
+                {createdAt ? (
+                  <div className="flex items-center gap-2 text-gray-500">
+                    <CalendarDays size={16} className="text-slate-500" />
+                    <span className="text-sm">Publie le {formatDate(createdAt)}</span>
+                  </div>
+                ) : null}
+              </div>
+              <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
+                <Link
+                  href={`/jobs/${job.id}`}
+                  className="inline-flex h-10 items-center justify-center rounded-md border border-gray-200 bg-white px-5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
+                >
+                  Voir detail
+                </Link>
+
+                {isValidUrl(source) ? (
+                  <a
+                    href={source}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex h-10 items-center justify-center rounded-md bg-orange-500  px-5 text-sm font-semibold text-white transition-colors hover:bg-[#c2410c]"
+                  >
+                    Postuler
+                  </a>
+                ) : (
+                  <button
+                    disabled
+                    className="inline-flex h-10 cursor-not-allowed items-center justify-center rounded-md  bg-orange-500 px-5 text-sm font-semibold text-white"
+                  >
+                    Postuler
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Badge "En vedette" */}
       {job.featured ? (
-        <div className="absolute top-0 right-0 -translate-y-1/2 translate-x-4 bg-orange-500 text-white text-xs px-3 py-1 rounded rotate-12">
+        <div className="absolute right-3 top-3 rounded-full bg-orange-500 px-2.5 py-1 text-xs font-semibold text-white">
           En vedette
         </div>
       ) : null}
@@ -141,16 +162,99 @@ function stripHtml(input: string) {
   return input.replace(/<[^>]*>/g, '');
 }
 
-function isValidUrl(s: any) {
+function getDescriptionText(job: JobCardData): string {
+  const directCandidates = [
+    (job as { description?: unknown }).description,
+    (job as { details?: unknown }).details,
+    (job as { summary?: unknown }).summary,
+    (job as { content?: unknown }).content,
+    (job as { job_description?: unknown }).job_description,
+    (job as { jobDescription?: unknown }).jobDescription,
+    (job as { description_text?: unknown }).description_text,
+    (job as { Description?: unknown }).Description,
+  ];
+
+  for (const candidate of directCandidates) {
+    if (typeof candidate === 'string' && candidate.trim()) {
+      return candidate.trim();
+    }
+  }
+
+  for (const [key, value] of Object.entries(job as Record<string, unknown>)) {
+    if (!/description|details|summary|content/i.test(key)) continue;
+    if (typeof value === 'string' && value.trim()) {
+      return value.trim();
+    }
+  }
+
+  return '';
+}
+
+function getAdditionalDetails(job: JobCardData): Array<{ label: string; value: string }> {
+  const ignoredKeys = new Set([
+    'id',
+    'title',
+    'description',
+    'details',
+    'summary',
+    'content',
+    'job_description',
+    'jobDescription',
+    'description_text',
+    'company',
+    'company_name',
+    'companyName',
+    'company_logo',
+    'companyLogo',
+    'created_at',
+    'createdAt',
+    'created',
+    'source',
+    'applyUrl',
+    'apply_url',
+    'location',
+    'type',
+    'jobType',
+    'salary',
+    'featured',
+  ]);
+
+  const details: Array<{ label: string; value: string }> = [];
+  const record = job as Record<string, unknown>;
+
+  for (const [key, value] of Object.entries(record)) {
+    if (ignoredKeys.has(key) || value == null) continue;
+    if (typeof value === 'string' && !value.trim()) continue;
+
+    let formatted = '';
+    if (Array.isArray(value)) {
+      formatted = value.map((item) => String(item)).join(', ');
+    } else if (typeof value === 'object') {
+      formatted = JSON.stringify(value);
+    } else {
+      formatted = String(value);
+    }
+
+    if (!formatted.trim()) continue;
+    details.push({
+      label: key.replace(/_/g, ' ').replace(/([a-z])([A-Z])/g, '$1 $2'),
+      value: formatted,
+    });
+  }
+
+  return details.slice(0, 8);
+}
+
+function isValidUrl(s: unknown) {
   if (!s || typeof s !== 'string') return false;
   return /^https?:\/\//i.test(s);
 }
 
-function formatDate(s: any) {
+function formatDate(s: unknown) {
   try {
     const d = new Date(s);
-    return d.toLocaleDateString();
-  } catch (e) {
+    return d.toLocaleDateString('fr-FR');
+  } catch {
     return String(s);
   }
 }

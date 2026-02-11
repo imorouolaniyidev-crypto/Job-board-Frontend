@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Job, JobType, WorkMode, JobStatus } from '@/lib/types';
+import { Job, JobType, JobSource } from '@/lib/types';
 import { X } from 'lucide-react';
 
 interface JobFormProps {
@@ -14,14 +14,14 @@ export default function JobForm({ job, onSave, onCancel }: JobFormProps) {
 	const isEdit = !!job;
 
 	const [title, setTitle] = useState(job?.title || '');
-	const [company, setCompany] = useState(job?.company || '');
+	const [companyName, setCompanyName] = useState(job?.company_name || '');
+	const [companyLogo, setCompanyLogo] = useState(job?.company_logo || '');
 	const [description, setDescription] = useState(job?.description || '');
-	const [requirements, setRequirements] = useState(job?.requirements?.join(', ') || '');
-	const [salary, setSalary] = useState(job?.salary || '');
 	const [location, setLocation] = useState(job?.location || '');
-	const [jobType, setJobType] = useState<JobType>(job?.jobType || 'CDI');
-	const [workMode, setWorkMode] = useState<WorkMode>(job?.workMode || 'REMOTE');
-	const [status, setStatus] = useState<JobStatus>(job?.status || 'DRAFT');
+	const [jobType, setJobType] = useState<JobType>(job?.type || 'CDI');
+	const [source, setSource] = useState<JobSource>(job?.source || 'INTERNAL');
+	const [sourceUrl, setSourceUrl] = useState(job?.source_url || '');
+	const [isActive, setIsActive] = useState(job?.is_active ?? true);
 	const [errors, setErrors] = useState<Record<string, string>>({});
 	const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -29,14 +29,25 @@ export default function JobForm({ job, onSave, onCancel }: JobFormProps) {
 		const newErrors: Record<string, string> = {};
 
 		if (!title.trim()) newErrors.title = 'Le titre est requis';
-		if (!company.trim()) newErrors.company = 'L\'entreprise est requise';
+		if (!companyName.trim()) newErrors.company_name = 'L\'entreprise est requise';
 		if (!description.trim()) newErrors.description = 'La description est requise';
 		if (!location.trim()) newErrors.location = 'Le lieu est requis';
+		if (source === 'EXTERNAL' && !sourceUrl.trim()) newErrors.source_url = 'L\'URL est requise pour les offres externes';
+		if (source === 'EXTERNAL' && sourceUrl && !isValidUrl(sourceUrl)) newErrors.source_url = 'L\'URL n\'est pas valide';
 		if (title.length < 3) newErrors.title = 'Le titre doit contenir au moins 3 caractères';
 		if (description.length < 10) newErrors.description = 'La description doit contenir au moins 10 caractères';
 
 		setErrors(newErrors);
 		return Object.keys(newErrors).length === 0;
+	};
+
+	const isValidUrl = (url: string): boolean => {
+		try {
+			new URL(url);
+			return true;
+		} catch {
+			return false;
+		}
 	};
 
 	const handleSubmit = async (e: React.FormEvent) => {
@@ -53,18 +64,14 @@ export default function JobForm({ job, onSave, onCancel }: JobFormProps) {
 
 			onSave({
 				title,
-				company,
+				company_name: companyName,
+				company_logo: companyLogo || undefined,
 				description,
-				requirements: requirements
-					.split(',')
-					.map(r => r.trim())
-					.filter(r => r),
-				salary: salary || undefined,
 				location,
-				jobType,
-				workMode,
-				status,
-				createdBy: 'admin@platform.com',
+				type: jobType,
+				source,
+				source_url: source === 'EXTERNAL' ? sourceUrl : undefined,
+				is_active: isActive,
 			});
 		} finally {
 			setIsSubmitting(false);
@@ -73,9 +80,9 @@ export default function JobForm({ job, onSave, onCancel }: JobFormProps) {
 
 	return (
 		<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-			<div className="w-full max-w-2xl bg-white dark:bg-gray-800 rounded-lg shadow-lg">
+			<div className="w-full max-w-2xl bg-white dark:bg-gray-800 rounded-lg shadow-lg max-h-[90vh] flex flex-col">
 				{/* Header */}
-				<div className="flex items-center justify-between border-b border-gray-200 dark:border-gray-700 p-6">
+				<div className="flex items-center justify-between border-b border-gray-200 dark:border-gray-700 p-6 flex-shrink-0">
 					<h2 className="text-xl font-bold text-gray-900 dark:text-white">
 						{isEdit ? '✏️ Éditer l\'offre' : '➕ Créer une nouvelle offre'}
 					</h2>
@@ -87,8 +94,8 @@ export default function JobForm({ job, onSave, onCancel }: JobFormProps) {
 					</button>
 				</div>
 
-				{/* Form Content */}
-				<form onSubmit={handleSubmit} className="p-6 space-y-5">
+				{/* Form Content - Scrollable */}
+				<form onSubmit={handleSubmit} className="p-6 space-y-5 overflow-y-auto flex-1">
 					{/* Titre */}
 					<div>
 						<label className="block text-sm font-medium text-gray-900 dark:text-white mb-2">
@@ -108,7 +115,7 @@ export default function JobForm({ job, onSave, onCancel }: JobFormProps) {
 						{errors.title && <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.title}</p>}
 					</div>
 
-					{/* Company & Location */}
+					{/* Company Name & Location */}
 					<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 						<div>
 							<label className="block text-sm font-medium text-gray-900 dark:text-white mb-2">
@@ -116,16 +123,16 @@ export default function JobForm({ job, onSave, onCancel }: JobFormProps) {
 							</label>
 							<input
 								type="text"
-								value={company}
-								onChange={e => setCompany(e.target.value)}
+								value={companyName}
+								onChange={e => setCompanyName(e.target.value)}
 								placeholder="ex: TechNova"
 								className={`w-full px-4 py-2 rounded-lg border ${
-									errors.company
+									errors.company_name
 										? 'border-red-500 dark:border-red-400'
 										: 'border-gray-300 dark:border-gray-600'
 								} bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500`}
 							/>
-							{errors.company && <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.company}</p>}
+							{errors.company_name && <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.company_name}</p>}
 						</div>
 
 						<div>
@@ -136,7 +143,7 @@ export default function JobForm({ job, onSave, onCancel }: JobFormProps) {
 								type="text"
 								value={location}
 								onChange={e => setLocation(e.target.value)}
-								placeholder="ex: Paris, France ou Télétravail"
+								placeholder="ex: Paris, France"
 								className={`w-full px-4 py-2 rounded-lg border ${
 									errors.location
 										? 'border-red-500 dark:border-red-400'
@@ -145,6 +152,20 @@ export default function JobForm({ job, onSave, onCancel }: JobFormProps) {
 							/>
 							{errors.location && <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.location}</p>}
 						</div>
+					</div>
+
+					{/* Company Logo URL */}
+					<div>
+						<label className="block text-sm font-medium text-gray-900 dark:text-white mb-2">
+							URL du logo de l'entreprise (optionnel)
+						</label>
+						<input
+							type="url"
+							value={companyLogo}
+							onChange={e => setCompanyLogo(e.target.value)}
+							placeholder="ex: https://example.com/logo.png"
+							className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+						/>
 					</div>
 
 					{/* Description */}
@@ -156,7 +177,7 @@ export default function JobForm({ job, onSave, onCancel }: JobFormProps) {
 							value={description}
 							onChange={e => setDescription(e.target.value)}
 							placeholder="Décrivez le poste, les responsabilités et les compétences requises..."
-							rows={5}
+							rows={4}
 							className={`w-full px-4 py-2 rounded-lg border ${
 								errors.description
 									? 'border-red-500 dark:border-red-400'
@@ -168,35 +189,7 @@ export default function JobForm({ job, onSave, onCancel }: JobFormProps) {
 						)}
 					</div>
 
-					{/* Requirements */}
-					<div>
-						<label className="block text-sm font-medium text-gray-900 dark:text-white mb-2">
-							Compétences requises
-						</label>
-						<input
-							type="text"
-							value={requirements}
-							onChange={e => setRequirements(e.target.value)}
-							placeholder="ex: React, TypeScript, Tailwind (séparées par des virgules)"
-							className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
-						/>
-					</div>
-
-					{/* Salary */}
-					<div>
-						<label className="block text-sm font-medium text-gray-900 dark:text-white mb-2">
-							Salaire (optionnel)
-						</label>
-						<input
-							type="text"
-							value={salary}
-							onChange={e => setSalary(e.target.value)}
-							placeholder="ex: 45k€ - 55k€"
-							className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
-						/>
-					</div>
-
-					{/* Type & Work Mode */}
+					{/* Type & Source */}
 					<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 						<div>
 							<label className="block text-sm font-medium text-gray-900 dark:text-white mb-2">
@@ -209,49 +202,62 @@ export default function JobForm({ job, onSave, onCancel }: JobFormProps) {
 							>
 								<option value="CDI">CDI</option>
 								<option value="CDD">CDD</option>
-								<option value="STAGE">Stage</option>
 							</select>
 						</div>
 
 						<div>
 							<label className="block text-sm font-medium text-gray-900 dark:text-white mb-2">
-								Mode de travail *
+								Source *
 							</label>
 							<select
-								value={workMode}
-								onChange={e => setWorkMode(e.target.value as WorkMode)}
+								value={source}
+								onChange={e => setSource(e.target.value as JobSource)}
 								className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
 							>
-								<option value="REMOTE">Télétravail</option>
-								<option value="ON_SITE">Sur site</option>
-								<option value="HYBRID">Hybride</option>
+								<option value="INTERNAL">Interne</option>
+								<option value="EXTERNAL">Externe</option>
 							</select>
 						</div>
 					</div>
 
-					{/* Statut */}
-					<div>
-						<label className="block text-sm font-medium text-gray-900 dark:text-white mb-2">
-							Statut *
+					{/* URL de l'offre externe (conditionnel) */}
+					{source === 'EXTERNAL' && (
+						<div>
+							<label className="block text-sm font-medium text-gray-900 dark:text-white mb-2">
+								URL de l'offre externe *
+							</label>
+							<input
+								type="url"
+								value={sourceUrl}
+								onChange={e => setSourceUrl(e.target.value)}
+								placeholder="ex: https://www.linkedin.com/jobs/view/..."
+								className={`w-full px-4 py-2 rounded-lg border ${
+									errors.source_url
+										? 'border-red-500 dark:border-red-400'
+										: 'border-gray-300 dark:border-gray-600'
+								} bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500`}
+							/>
+							{errors.source_url && <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.source_url}</p>}
+						</div>
+					)}
+
+					{/* Active Status */}
+					<div className="flex items-center gap-3 p-3 rounded-lg bg-gray-50 dark:bg-gray-700">
+						<input
+							type="checkbox"
+							id="isActive"
+							checked={isActive}
+							onChange={e => setIsActive(e.target.checked)}
+							className="w-4 h-4 rounded border-gray-300"
+						/>
+						<label htmlFor="isActive" className="text-sm font-medium text-gray-900 dark:text-white cursor-pointer">
+							Offre active
 						</label>
-						<select
-							value={status}
-							onChange={e => setStatus(e.target.value as JobStatus)}
-							className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-						>
-							<option value="DRAFT">Brouillon</option>
-							<option value="PUBLISHED">Publiée</option>
-							<option value="CLOSED">Fermée</option>
-							<option value="ARCHIVED">Archivée</option>
-						</select>
-						<p className="mt-1 text-xs text-gray-600 dark:text-gray-400">
-							💡 Choisissez "Brouillon" pour revoir la fiche avant de publier
-						</p>
 					</div>
 				</form>
 
 				{/* Footer */}
-				<div className="flex items-center justify-end gap-3 border-t border-gray-200 dark:border-gray-700 p-6">
+				<div className="flex items-center justify-end gap-3 border-t border-gray-200 dark:border-gray-700 p-6 flex-shrink-0">
 					<button
 						type="button"
 						onClick={onCancel}

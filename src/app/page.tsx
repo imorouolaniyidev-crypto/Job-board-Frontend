@@ -27,7 +27,7 @@ export default function JobsPage() {
             className="object-contain" alt="logo_job-booster" />
           <ul className="flex text-[#2c3e6e] space-x-4">
             <a href="/" className="hover:underline cursor-pointer">Accueil</a>
-            <a href="/" className="hover:underline cursor-pointer">Offres</a>
+            <a href="/offres" className="hover:underline cursor-pointer">Offres</a>
             <a href="/candidats" className="hover:underline cursor-pointer">Candidats</a>
             {user ? (
               <a href="/profile" className="hover:underline cursor-pointer">

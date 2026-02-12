@@ -7,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { LogOut, User, Briefcase } from 'lucide-react';
 import { toast } from 'sonner';
-
+import { api } from "@/lib/api";
 export default function ProtectedLayout({ children }: { children: React.ReactNode }) {
   const user = useAuthStore((state: any) => state.user);
   const logout = useAuthStore((state: any) => state.logout);
@@ -27,12 +27,17 @@ export default function ProtectedLayout({ children }: { children: React.ReactNod
     setIsReady(true);
   }, [user, router]);
 
-  const handleLogout = () => {
-    logout();
-    toast.success('Vous êtes déconnecté');
-    router.push('/login');
-  };
+  const handleLogout = async () => {
+  try {
+    await api.post("/auth/logout", {}, { withCredentials: true });
 
+    logout(); // Zustand
+    toast.success("Vous êtes déconnecté");
+    router.push("/");
+  } catch (error) {
+    toast.error("Erreur lors de la déconnexion");
+  }
+};
   if (!isReady) {
     return (
       <div className="flex items-center justify-center min-h-screen">

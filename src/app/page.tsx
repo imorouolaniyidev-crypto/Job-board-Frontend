@@ -1,18 +1,3 @@
-<<<<<<< HEAD
-'use client';
-
-import React from 'react';
-import Link from 'next/link';
-import JobListClient from '@/components/jobs/JobListClient';
-import JobFilters from '@/components/jobs/JobFilters';
-import { useAuthStore } from '@/lib/store';
-
-type Filters = {
-  q?: string;
-  type?: string;
-  location?: string;
-};
-=======
 "use client";
 import { useEffect } from "react";
 import React from "react";
@@ -22,27 +7,14 @@ import mockJobs from "@/lib/mockJobs";
 import Link from "next/link";
 import LoginPage from "@/app/(auth)/login/page";
 import { useAuthStore } from "@/lib/store";
->>>>>>> origin/feat/fronttest
 
 export default function JobsPage() {
   const user = useAuthStore((state) => state.user);
-<<<<<<< HEAD
-  const [quickFilters, setQuickFilters] = React.useState<Filters>({
-    q: '',
-    type: '',
-    location: '',
-  });
-  const hasQuickFilters =
-    Boolean(quickFilters.q?.trim()) ||
-    Boolean(quickFilters.type?.trim()) ||
-    Boolean(quickFilters.location?.trim());
-=======
   const fetchMe = useAuthStore((state) => state.fetchMe);
 
   useEffect(() => {
     fetchMe();
   }, []);
->>>>>>> origin/feat/fronttest
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-slate-100">

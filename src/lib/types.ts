@@ -56,22 +56,20 @@ export interface User {
 // ADMIN - JOBS
 // ============================================
 
-export type JobType = 'CDI' | 'CDD' | 'STAGE';
-export type WorkMode = 'REMOTE' | 'ON_SITE' | 'HYBRID';
-export type JobStatus = 'DRAFT' | 'PUBLISHED' | 'CLOSED' | 'ARCHIVED';
+export type JobType = 'CDI' | 'CDD';
+export type JobSource = 'INTERNAL' | 'EXTERNAL';
 
 export interface Job {
   id: string;
   title: string;
-  company: string;
+  company_name: string;
+  company_logo?: string;
   description: string;
-  requirements: string[];
-  salary?: string;
-  location: string;
-  jobType: JobType;
-  workMode: WorkMode;
-  status: JobStatus;
-  createdBy: string;
+  location?: string;
+  source: JobSource;
+  source_url?: string;
+  type: JobType;
+  is_active: boolean;
   createdAt: string;
   updatedAt: string;
   applicationsCount?: number;

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Job, JobStatus } from '@/lib/types';
+import { Job } from '@/lib/types';
 import mockJobs from '@/lib/mockJobs';
 import { Plus, Edit2, Trash2, Eye } from 'lucide-react';
 import JobForm from '@/components/admin/JobForm';
@@ -14,10 +14,10 @@ export default function JobsPage() {
 	const [jobs, setJobs] = useState<Job[]>(mockJobs);
 	const [jobModal, setJobModal] = useState<JobModalState>(null);
 	const [deleteModal, setDeleteModal] = useState<Job | null>(null);
-	const [filter, setFilter] = useState<JobStatus | 'ALL'>('ALL');
+	const [filter, setFilter] = useState<'ALL' | boolean>('ALL');
 
-	// Filter jobs based on status
-	const filteredJobs = filter === 'ALL' ? jobs : jobs.filter(job => job.status === filter);
+	// Filter jobs based on active status
+	const filteredJobs = filter === 'ALL' ? jobs : jobs.filter(job => job.is_active === filter);
 
 	// Handle create/edit submit
 	const handleSaveJob = (formData: Omit<Job, 'id' | 'createdAt' | 'updatedAt'>) => {
@@ -71,19 +71,19 @@ export default function JobsPage() {
 
 			{/* Filters */}
 			<div className="mb-6 flex gap-2 overflow-x-auto pb-2">
-				{(['ALL', 'PUBLISHED', 'DRAFT', 'CLOSED', 'ARCHIVED'] as const).map(status => (
+				{(['ALL', 'ACTIVE', 'INACTIVE'] as const).map(status => (
 					<button
 						key={status}
-						onClick={() => setFilter(status)}
+						onClick={() => setFilter(status === 'ALL' ? 'ALL' : status === 'ACTIVE')}
 						className={`px-4 py-2 rounded-lg whitespace-nowrap transition-colors ${
-							filter === status
+							(status === 'ALL' && filter === 'ALL') || (status === 'ACTIVE' && filter === true) || (status === 'INACTIVE' && filter === false)
 								? 'bg-blue-600 text-white'
 								: 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
 						}`}
 					>
-						{status === 'ALL' ? 'Toutes' : getStatusLabel(status)}{' '}
+						{status === 'ALL' ? 'Toutes' : status === 'ACTIVE' ? 'Actives' : 'Inactives'}{' '}
 						<span className="text-xs">
-							({jobs.filter(j => status === 'ALL' || j.status === status).length})
+							({jobs.filter(j => status === 'ALL' || (status === 'ACTIVE' ? j.is_active : !j.is_active)).length})
 						</span>
 					</button>
 				))}
@@ -99,10 +99,13 @@ export default function JobsPage() {
 									Titre
 								</th>
 								<th className="px-6 py-4 text-left text-sm font-semibold text-gray-900 dark:text-white">
+									Entreprise
+								</th>
+								<th className="px-6 py-4 text-left text-sm font-semibold text-gray-900 dark:text-white">
 									Type
 								</th>
 								<th className="px-6 py-4 text-left text-sm font-semibold text-gray-900 dark:text-white">
-									Mode
+									Source
 								</th>
 								<th className="px-6 py-4 text-left text-sm font-semibold text-gray-900 dark:text-white">
 									Statut
@@ -118,7 +121,7 @@ export default function JobsPage() {
 						<tbody>
 							{filteredJobs.length === 0 ? (
 								<tr>
-									<td colSpan={6} className="px-6 py-8 text-center text-gray-500 dark:text-gray-400">
+									<td colSpan={7} className="px-6 py-8 text-center text-gray-500 dark:text-gray-400">
 										Aucune offre trouvée
 									</td>
 								</tr>
@@ -131,26 +134,28 @@ export default function JobsPage() {
 										<td className="px-6 py-4">
 											<div>
 												<p className="font-medium text-gray-900 dark:text-white">{job.title}</p>
-												<p className="text-sm text-gray-600 dark:text-gray-400">{job.company}</p>
 											</div>
 										</td>
 										<td className="px-6 py-4">
+											<span className="text-sm text-gray-600 dark:text-gray-400">{job.company_name}</span>
+										</td>
+										<td className="px-6 py-4">
 											<span className="text-sm font-medium text-gray-900 dark:text-white">
-												{getTypeLabel(job.jobType)}
+												{getTypeLabel(job.type)}
 											</span>
 										</td>
 										<td className="px-6 py-4">
 											<span className="text-sm text-gray-600 dark:text-gray-400">
-												{getWorkModeLabel(job.workMode)}
+												{getSourceLabel(job.source)}
 											</span>
 										</td>
 										<td className="px-6 py-4">
 											<span
 												className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(
-													job.status
+													job.is_active
 												)}`}
 											>
-												{getStatusLabel(job.status)}
+												{job.is_active ? 'Actif' : 'Inactif'}
 											</span>
 										</td>
 										<td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">
@@ -165,6 +170,17 @@ export default function JobsPage() {
 												>
 													<Edit2 size={18} />
 												</button>
+												{job.source === 'EXTERNAL' && job.source_url && (
+													<a
+														href={job.source_url}
+														target="_blank"
+														rel="noopener noreferrer"
+														className="p-2 text-green-600 hover:bg-green-50 dark:hover:bg-green-900 rounded-lg transition-colors"
+														title="Voir l'offre externe"
+													>
+														<Eye size={18} />
+													</a>
+												)}
 												<button
 													onClick={() => setDeleteModal(job)}
 													className="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900 rounded-lg transition-colors"
@@ -183,24 +199,18 @@ export default function JobsPage() {
 			</div>
 
 			{/* Stats Footer */}
-			<div className="mt-8 grid grid-cols-1 md:grid-cols-4 gap-4">
+			<div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4">
 				<div className="p-4 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
 					<p className="text-sm text-gray-600 dark:text-gray-400">Total</p>
 					<p className="text-2xl font-bold text-gray-900 dark:text-white">{jobs.length}</p>
 				</div>
 				<div className="p-4 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
-					<p className="text-sm text-gray-600 dark:text-gray-400">Publiées</p>
-					<p className="text-2xl font-bold text-green-600">{jobs.filter(j => j.status === 'PUBLISHED').length}</p>
+					<p className="text-sm text-gray-600 dark:text-gray-400">Actifs</p>
+					<p className="text-2xl font-bold text-green-600">{jobs.filter(j => j.is_active).length}</p>
 				</div>
 				<div className="p-4 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
-					<p className="text-sm text-gray-600 dark:text-gray-400">Brouillons</p>
-					<p className="text-2xl font-bold text-yellow-600">{jobs.filter(j => j.status === 'DRAFT').length}</p>
-				</div>
-				<div className="p-4 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
-					<p className="text-sm text-gray-600 dark:text-gray-400">Fermées</p>
-					<p className="text-2xl font-bold text-red-600">
-						{jobs.filter(j => j.status === 'CLOSED' || j.status === 'ARCHIVED').length}
-					</p>
+					<p className="text-sm text-gray-600 dark:text-gray-400">Inactifs</p>
+					<p className="text-2xl font-bold text-red-600">{jobs.filter(j => !j.is_active).length}</p>
 				</div>
 			</div>
 
@@ -230,36 +240,20 @@ function getTypeLabel(type: string): string {
 	const labels: Record<string, string> = {
 		CDI: 'CDI',
 		CDD: 'CDD',
-		STAGE: 'Stage',
 	};
 	return labels[type] || type;
 }
 
-function getWorkModeLabel(mode: string): string {
+function getSourceLabel(source: string): string {
 	const labels: Record<string, string> = {
-		REMOTE: 'Télétravail',
-		ON_SITE: 'Sur site',
-		HYBRID: 'Hybride',
+		INTERNAL: 'Interne',
+		EXTERNAL: 'Externe',
 	};
-	return labels[mode] || mode;
+	return labels[source] || source;
 }
 
-function getStatusLabel(status: string): string {
-	const labels: Record<string, string> = {
-		PUBLISHED: 'Publiée',
-		DRAFT: 'Brouillon',
-		CLOSED: 'Fermée',
-		ARCHIVED: 'Archivée',
-	};
-	return labels[status] || status;
-}
-
-function getStatusColor(status: string): string {
-	const colors: Record<string, string> = {
-		PUBLISHED: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
-		DRAFT: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200',
-		CLOSED: 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200',
-		ARCHIVED: 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200',
-	};
-	return colors[status] || 'bg-gray-100 text-gray-800';
+function getStatusColor(isActive: boolean): string {
+	return isActive
+		? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
+		: 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200';
 }

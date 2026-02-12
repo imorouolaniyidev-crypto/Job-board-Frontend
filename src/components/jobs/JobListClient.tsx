@@ -119,9 +119,10 @@ export default function JobListClient({
   }
 
   if (error && shouldFetchFromApi) {
+    const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
     return (
       <div className="py-8 text-center text-sm text-red-600">
-        Impossible de charger les offres depuis la base de donnees.
+        Impossible de charger les offres depuis la base de donnees. {errorMessage}
       </div>
     );
   }

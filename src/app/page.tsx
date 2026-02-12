@@ -1,10 +1,11 @@
-'use client';
-
-import React from 'react';
-import Link from 'next/link';
-import JobListClient from '@/components/jobs/JobListClient';
-import JobFilters from '@/components/jobs/JobFilters';
-import { useAuthStore } from '@/lib/store';
+"use client";
+import React from "react";
+import { useEffect } from "react";
+import JobListClient from "@/components/jobs/JobListClient";
+import JobFilters from "@/components/jobs/JobFilters";
+import Link from "next/link";
+import { useAuthStore } from "@/lib/store";
+import { Briefcase, Home, LogIn, UserCircle, Users } from "lucide-react";
 
 type Filters = {
   q?: string;
@@ -14,15 +15,21 @@ type Filters = {
 
 export default function JobsPage() {
   const user = useAuthStore((state) => state.user);
+  const [isCheckingAuth, setIsCheckingAuth] = React.useState(true);
   const [quickFilters, setQuickFilters] = React.useState<Filters>({
-    q: '',
-    type: '',
-    location: '',
+    q: "",
+    type: "",
+    location: "",
   });
   const hasQuickFilters =
     Boolean(quickFilters.q?.trim()) ||
     Boolean(quickFilters.type?.trim()) ||
     Boolean(quickFilters.location?.trim());
+  const fetchMe = useAuthStore((state) => state.fetchMe);
+
+  useEffect(() => {
+    fetchMe().finally(() => setIsCheckingAuth(false));
+  }, [fetchMe]);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-slate-100">
@@ -36,21 +43,26 @@ export default function JobsPage() {
             alt="logo_job-booster"
           />
           <ul className="flex items-center space-x-4 text-[#2c3e6e]">
-            <Link href="/" className="cursor-pointer hover:underline">
+            <Link href="/" className="flex items-center gap-1.5 cursor-pointer hover:underline">
+              <Home size={16} />
               Accueil
             </Link>
-            <Link href="/" className="cursor-pointer hover:underline">
+            <Link href="/" className="flex items-center gap-1.5 cursor-pointer hover:underline">
+              <Briefcase size={16} />
               Offres
             </Link>
-            <Link href="/candidats" className="cursor-pointer hover:underline">
+            <Link href="/candidats" className="flex items-center gap-1.5 cursor-pointer hover:underline">
+              <Users size={16} />
               Candidats
             </Link>
-            {user ? (
-              <Link href="/profile" className="cursor-pointer hover:underline">
+            {!isCheckingAuth && user?.role === "CANDIDATE" ? (
+              <Link href="/profile" className="flex items-center gap-1.5 cursor-pointer hover:underline">
+                <UserCircle size={16} />
                 Mon Profil
               </Link>
             ) : (
-              <Link href="/login" className="cursor-pointer hover:underline">
+              <Link href="/login" className="flex items-center gap-1.5 cursor-pointer hover:underline">
+                <LogIn size={16} />
                 Se connecter
               </Link>
             )}
@@ -77,7 +89,7 @@ export default function JobsPage() {
         <div className="mb-6 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
           <h2 className="mb-4 text-lg font-semibold text-slate-800">Recherche rapide</h2>
           <JobFilters
-            initial={{ q: '', type: '', location: '' }}
+            initial={{ q: "", type: "", location: "" }}
             onChange={(filters) => setQuickFilters(filters)}
           />
         </div>

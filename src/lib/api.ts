@@ -62,6 +62,25 @@ function normalizeEntityPayload<T>(payload: unknown): T | null {
   return null;
 }
 
+function extractApiErrorMessage(error: unknown): string {
+  if (!axios.isAxiosError(error)) {
+    return 'Erreur inconnue';
+  }
+
+  const status = error.response?.status;
+  const data = error.response?.data as
+    | { message?: string; error?: string; details?: string }
+    | string
+    | undefined;
+
+  const apiMessage =
+    typeof data === 'string'
+      ? data
+      : data?.message || data?.error || data?.details || error.message || 'Erreur API';
+
+  return status ? `HTTP ${status} - ${apiMessage}` : apiMessage;
+}
+
 // ============================================
 // CANDIDATE PROFILE API ENDPOINTS
 // ============================================
@@ -131,8 +150,18 @@ export const applicationsApi = {
 
 export const jobsApi = {
   getJobs: async (): Promise<Job[]> => {
-    const response = await api.get('/jobs');
-    return normalizeCollectionPayload<Job>(response.data);
+    try {
+      const response = await api.get('/jobs');
+      return normalizeCollectionPayload<Job>(response.data);
+    } catch (firstError) {
+      // Some backends expose /job instead of /jobs.
+      try {
+        const fallbackResponse = await api.get('/job');
+        return normalizeCollectionPayload<Job>(fallbackResponse.data);
+      } catch {
+        throw new Error(`Impossible de charger les offres: ${extractApiErrorMessage(firstError)}`);
+      }
+    }
   },
 
   getJob: async (jobId: string): Promise<Job | null> => {

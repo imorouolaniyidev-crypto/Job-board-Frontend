@@ -4,9 +4,11 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { LayoutDashboard, Briefcase, Users, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useAuthStore } from '@/lib/store';
 
 export default function AdminSidebar() {
   const pathname = usePathname();
+  const logout = useAuthStore((state: any) => state.logout);
 
   const menuItems = [
     {
@@ -31,7 +33,9 @@ export default function AdminSidebar() {
   const handleLogout = async () => {
     try {
       await fetch('/api/admin-auth/logout', { method: 'POST' });
+      await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
     } finally {
+      logout();
       window.location.href = '/admin/login';
     }
   };

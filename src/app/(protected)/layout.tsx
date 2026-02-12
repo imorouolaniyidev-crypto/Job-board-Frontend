@@ -27,10 +27,20 @@ export default function ProtectedLayout({ children }: { children: React.ReactNod
     setIsReady(true);
   }, [user, router]);
 
-  const handleLogout = () => {
-    logout();
-    toast.success('Vous êtes déconnecté');
-    router.push('/login');
+  const handleLogout = async () => {
+    try {
+      await fetch('/api/auth/logout', {
+        method: 'POST',
+        credentials: 'include',
+      });
+    } catch {
+      // Meme si l'API logout echoue, on nettoie le state local.
+    } finally {
+      logout();
+      toast.success('Vous etes deconnecte');
+      router.push('/');
+      router.refresh();
+    }
   };
 
   if (!isReady) {
@@ -98,3 +108,4 @@ export default function ProtectedLayout({ children }: { children: React.ReactNod
     </div>
   );
 }
+

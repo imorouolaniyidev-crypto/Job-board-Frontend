@@ -39,9 +39,18 @@ export default function LoginPage() {
 
     try {
       const response = await api.post("/auth/login", { email, password });
+      const loggedUser = response?.data?.user;
+      if (!loggedUser) {
+        newErrors.password =
+          "Connexion backend invalide: aucune session utilisateur retournee.";
+        setErrors(newErrors);
+        toast.error("La connexion a echoue: aucune session n'a ete creee.");
+        return;
+      }
+
       // Le token est maintenant en httpOnly cookie (Set-Cookie du serveur)
       // On sauvegarde juste les infos utilisateur
-      setAuth(response.data.user);
+      setAuth(loggedUser);
       
       toast.success("Connexion réussie !");
       router.push("/");

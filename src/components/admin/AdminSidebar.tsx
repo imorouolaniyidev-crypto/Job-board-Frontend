@@ -44,12 +44,13 @@ export default function AdminSidebar() {
     <aside className="flex flex-col gap-4 border-r border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900 w-64 min-h-screen">
       {/* Header */}
       <div className="mb-8">
-        <Link href="/admin/dashboard" className="flex items-center gap-2">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-600 text-white font-bold">
-            A
-          </div>
-          <span className="font-bold text-xl text-gray-900 dark:text-white">Admin</span>
-        </Link>
+        <img
+            src="/JobBooster-Enterprises-ENG-FullColor.png"
+            width={200}
+            height={50}
+            className="object-contain"
+            alt="logo_job-booster"
+          />
       </div>
 
       {/* Menu Items */}

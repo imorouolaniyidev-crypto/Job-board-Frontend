@@ -1,12 +1,8 @@
 import React from 'react';
 import JobListClient from '@/components/jobs/JobListClient';
 import JobFilters from '@/components/jobs/JobFilters';
-import mockJobs from '@/lib/mockJobs';
 
 export default function JobsPage() {
-  // server-rendered initial data from mock (no backend)
-  const jobs = mockJobs;
-
   return (
     <main className="container mx-auto p-6">
       <div className="bg-[#2c3e6e] text-white rounded-lg p-8 mb-6 text-center">
@@ -18,7 +14,7 @@ export default function JobsPage() {
         <JobFilters initial={{ q: '', type: '', location: '' }} />
       </div>
 
-      <JobListClient initialJobs={jobs} />
+      <JobListClient />
     </main>
   );
 }

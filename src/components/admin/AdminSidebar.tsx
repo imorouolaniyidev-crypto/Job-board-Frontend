@@ -8,7 +8,7 @@ import { useAuthStore } from '@/lib/store';
 
 export default function AdminSidebar() {
   const pathname = usePathname();
-  const { logout } = useAuthStore();
+  const logout = useAuthStore((state: any) => state.logout);
 
   const menuItems = [
     {
@@ -30,9 +30,14 @@ export default function AdminSidebar() {
 
   const isActive = (href: string) => pathname.startsWith(href);
 
-  const handleLogout = () => {
-    logout();
-    window.location.href = '/login';
+  const handleLogout = async () => {
+    try {
+      await fetch('/api/admin-auth/logout', { method: 'POST' });
+      await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
+    } finally {
+      logout();
+      window.location.href = '/admin/login';
+    }
   };
 
   return (

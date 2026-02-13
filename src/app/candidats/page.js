@@ -1,4 +1,9 @@
-import React from "react";
+"use client";
+
+import React, { useEffect } from "react";
+import Link from "next/link";
+import { Briefcase, Home, LogIn, UserCircle, Users } from "lucide-react";
+import { useAuthStore } from "@/lib/store";
 
 // Exemple de données mockées pour les candidats
 const mockCandidates = [
@@ -26,6 +31,14 @@ const mockCandidates = [
 ];
 
 export default function CandidatesPage() {
+  const user = useAuthStore((state) => state.user);
+  const fetchMe = useAuthStore((state) => state.fetchMe);
+  const [isCheckingAuth, setIsCheckingAuth] = React.useState(true);
+
+  useEffect(() => {
+    fetchMe().finally(() => setIsCheckingAuth(false));
+  }, [fetchMe]);
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Navbar */}
@@ -34,11 +47,30 @@ export default function CandidatesPage() {
           <img src="/JobBooster-Enterprises-ENG-FullColor.png" width={150}
             height={50}
             className="object-contain" alt="logo_job-booster" />
-          <ul className="flex text-[#2c3e6e] space-x-4">
-            <a href="/" className="hover:underline cursor-pointer">Accueil</a>
-            <a href="/" className="hover:underline cursor-pointer">Offres</a>
-            <a href="/candidats" className="hover:underline cursor-pointer">Candidats</a>
-            <a href="/login" className="hover:underline cursor-pointer">Se connecter</a>
+          <ul className="flex items-center text-[#2c3e6e] space-x-4">
+            <Link href="/" className="flex items-center gap-1.5 hover:underline cursor-pointer">
+              <Home size={16} />
+              Accueil
+            </Link>
+            <Link href="/" className="flex items-center gap-1.5 hover:underline cursor-pointer">
+              <Briefcase size={16} />
+              Offres
+            </Link>
+            <Link href="/candidats" className="flex items-center gap-1.5 hover:underline cursor-pointer">
+              <Users size={16} />
+              Candidats
+            </Link>
+            {!isCheckingAuth && user?.role === "CANDIDATE" ? (
+              <Link href="/profile" className="flex items-center gap-1.5 hover:underline cursor-pointer">
+                <UserCircle size={16} />
+                Mon Profil
+              </Link>
+            ) : (
+              <Link href="/login" className="flex items-center gap-1.5 hover:underline cursor-pointer">
+                <LogIn size={16} />
+                Se connecter
+              </Link>
+            )}
           </ul>
         </div>
       </nav>

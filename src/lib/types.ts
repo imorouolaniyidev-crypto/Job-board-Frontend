@@ -1,7 +1,7 @@
 // Types pour le système de candidature au job board
 
 // Types pour le profil candidat
-export type ApplicationStatus = 'PENDING' | 'IN_PROGRESS' | 'ACCEPTED' | 'REJECTED';
+export type ApplicationStatus = 'PENDING' | 'REVIEWED' | 'REJECTED';
 export type CandidateStatus = 'ACTIVE' | 'REVIEWING' | 'REJECTED';
 
 // Profil utilisateur (champs texte simples)
@@ -34,12 +34,13 @@ export interface Application {
 export interface Candidate {
   id: string;
   email: string;
-  firstName?: string;
-  lastName?: string;
+  firstName: string;
+  lastName: string;
   phone?: string;
   skills?: string[];
   experience?: string;
   cvUrl?: string;
+  profileData?: Record<string, unknown>;
   status: CandidateStatus;
   createdAt: string;
   updatedAt: string;
@@ -63,14 +64,28 @@ export interface Job {
   id: string;
   title: string;
   company_name: string;
+  company?: string;
+  companyName?: string;
   company_logo?: string;
   description: string;
+  details?: string;
+  summary?: string;
+  content?: string;
+  job_description?: string;
+  jobDescription?: string;
+  description_text?: string;
+  Description?: string;
   location?: string;
   source: JobSource;
   source_url?: string;
   type: JobType;
+  jobType?: string;
+  applyUrl?: string;
+  apply_url?: string;
   is_active: boolean;
   createdAt: string;
+  created_at?: string;
+  created?: string;
   updatedAt: string;
   applicationsCount?: number;
 }
@@ -81,8 +96,7 @@ export interface Job {
 
 export interface ApplicationsByStatus {
   PENDING: number;
-  IN_PROGRESS: number;
-  ACCEPTED: number;
+  REVIEWED: number;
   REJECTED: number;
 }
 

@@ -6,7 +6,7 @@ import { X } from 'lucide-react';
 
 interface JobFormProps {
 	job?: Job;
-	onSave: (formData: Omit<Job, 'id' | 'createdAt' | 'updatedAt'>) => void;
+	onSave: (formData: Omit<Job, 'id' | 'createdAt' | 'updatedAt'>) => Promise<void>;
 	onCancel: () => void;
 }
 
@@ -60,9 +60,7 @@ export default function JobForm({ job, onSave, onCancel }: JobFormProps) {
 		setIsSubmitting(true);
 
 		try {
-			await new Promise(resolve => setTimeout(resolve, 500)); // Simulate API call
-
-			onSave({
+			await onSave({
 				title,
 				company_name: companyName,
 				company_logo: companyLogo || undefined,
@@ -99,7 +97,7 @@ export default function JobForm({ job, onSave, onCancel }: JobFormProps) {
 					{/* Titre */}
 					<div>
 						<label className="block text-sm font-medium text-gray-900 dark:text-white mb-2">
-							Titre de l'offre *
+							Titre de l&apos;offre *
 						</label>
 						<input
 							type="text"
@@ -157,7 +155,7 @@ export default function JobForm({ job, onSave, onCancel }: JobFormProps) {
 					{/* Company Logo URL */}
 					<div>
 						<label className="block text-sm font-medium text-gray-900 dark:text-white mb-2">
-							URL du logo de l'entreprise (optionnel)
+							URL du logo de l&apos;entreprise (optionnel)
 						</label>
 						<input
 							type="url"
@@ -224,7 +222,7 @@ export default function JobForm({ job, onSave, onCancel }: JobFormProps) {
 					{source === 'EXTERNAL' && (
 						<div>
 							<label className="block text-sm font-medium text-gray-900 dark:text-white mb-2">
-								URL de l'offre externe *
+								URL de l&apos;offre externe *
 							</label>
 							<input
 								type="url"

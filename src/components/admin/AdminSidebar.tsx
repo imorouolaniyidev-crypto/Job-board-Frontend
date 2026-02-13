@@ -8,7 +8,7 @@ import { useAuthStore } from '@/lib/store';
 
 export default function AdminSidebar() {
   const pathname = usePathname();
-  const logout = useAuthStore((state: any) => state.logout);
+  const logout = useAuthStore((state) => state.logout);
 
   const menuItems = [
     {

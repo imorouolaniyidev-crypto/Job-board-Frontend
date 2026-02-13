@@ -5,7 +5,8 @@ import JobListClient from "@/components/jobs/JobListClient";
 import JobFilters from "@/components/jobs/JobFilters";
 import Link from "next/link";
 import { useAuthStore } from "@/lib/store";
-import { Briefcase, Home, LogIn, UserCircle, Users } from "lucide-react";
+import { Briefcase, Home, LogIn, Users } from "lucide-react";
+import ProfileDropdown from "@/components/navbar/ProfileDropdown";
 
 type Filters = {
   q?: string;
@@ -42,7 +43,7 @@ export default function JobsPage() {
             className="object-contain"
             alt="logo_job-booster"
           />
-          <ul className="flex items-center space-x-4 text-[#2c3e6e]">
+          <ul className="flex items-center space-x-5 text-base font-semibold text-[#0a1530] md:text-[17px]">
             <Link href="/" className="flex items-center gap-1.5 cursor-pointer hover:underline">
               <Home size={16} />
               Accueil
@@ -56,10 +57,7 @@ export default function JobsPage() {
               Candidats
             </Link>
             {!isCheckingAuth && user?.role === "CANDIDATE" ? (
-              <Link href="/profile" className="flex items-center gap-1.5 cursor-pointer hover:underline">
-                <UserCircle size={16} />
-                Mon Profil
-              </Link>
+              <ProfileDropdown />
             ) : (
               <Link href="/login" className="flex items-center gap-1.5 cursor-pointer hover:underline">
                 <LogIn size={16} />

@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -10,8 +11,14 @@ import { Label } from '@/components/ui/label';
 export default function TestLoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState('admin@test.com');
-  const [role, setRole] = useState('ADMIN');
   const [isLoading, setIsLoading] = useState(false);
+  const role = 'ADMIN';
+
+  useEffect(() => {
+    if (process.env.NODE_ENV === 'production') {
+      router.replace('/admin/login');
+    }
+  }, [router]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();

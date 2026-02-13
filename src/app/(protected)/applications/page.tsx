@@ -9,16 +9,17 @@ import { Briefcase, Filter } from 'lucide-react';
 
 export default function ProtectedApplicationsPage() {
   const [applications] = useState<Application[]>(mockApplications);
-  const [selectedStatus, setSelectedStatus] = useState<'ALL' | ApplicationStatus>(
-    'ALL'
-  );
+  const [selectedStatus, setSelectedStatus] = useState<'ALL' | ApplicationStatus>('ALL');
 
-  const statusOptions: Array<{ value: 'ALL' | ApplicationStatus; label: string; color: 'blue' | 'gray' | 'yellow' | 'red' | 'green' }> = [
+  const statusOptions: Array<{
+    value: 'ALL' | ApplicationStatus;
+    label: string;
+    color: 'blue' | 'gray' | 'yellow' | 'red';
+  }> = [
     { value: 'ALL', label: 'Tous', color: 'gray' },
     { value: 'PENDING', label: 'En attente', color: 'yellow' },
-    { value: 'IN_PROGRESS', label: 'En cours', color: 'blue' },
-    { value: 'ACCEPTED', label: 'Acceptées', color: 'green' },
-    { value: 'REJECTED', label: 'Refusées', color: 'red' },
+    { value: 'REVIEWED', label: 'En revue', color: 'blue' },
+    { value: 'REJECTED', label: 'Refusees', color: 'red' },
   ];
 
   const filteredApplications =
@@ -29,64 +30,38 @@ export default function ProtectedApplicationsPage() {
   const stats = {
     total: applications.length,
     pending: applications.filter((a) => a.status === 'PENDING').length,
-    inProgress: applications.filter((a) => a.status === 'IN_PROGRESS').length,
-    accepted: applications.filter((a) => a.status === 'ACCEPTED').length,
+    reviewed: applications.filter((a) => a.status === 'REVIEWED').length,
     rejected: applications.filter((a) => a.status === 'REJECTED').length,
   };
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
       <div className="bg-white border-b border-gray-200 py-6 px-4">
         <div className="container mx-auto max-w-5xl">
           <div className="flex items-center gap-3">
             <Briefcase className="h-8 w-8 text-blue-600" />
             <div>
               <h1 className="text-3xl font-bold text-gray-900">Mes Candidatures</h1>
-              <p className="text-gray-600 mt-1">
-                Suivi de toutes vos candidatures
-              </p>
+              <p className="text-gray-600 mt-1">Suivi de toutes vos candidatures</p>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Contenu */}
       <div className="py-8 px-4">
         <div className="container mx-auto max-w-5xl space-y-8">
-          {/* Stats */}
           {applications.length > 0 && (
             <div>
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">
-                Statistiques
-              </h2>
-              <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+              <h2 className="text-lg font-semibold text-gray-900 mb-4">Statistiques</h2>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <StatCard label="Total" value={stats.total} color="gray" />
-                <StatCard
-                  label="En attente"
-                  value={stats.pending}
-                  color="yellow"
-                />
-                <StatCard
-                  label="En cours"
-                  value={stats.inProgress}
-                  color="blue"
-                />
-                <StatCard
-                  label="Acceptées"
-                  value={stats.accepted}
-                  color="green"
-                />
-                <StatCard
-                  label="Refusées"
-                  value={stats.rejected}
-                  color="red"
-                />
+                <StatCard label="En attente" value={stats.pending} color="yellow" />
+                <StatCard label="En revue" value={stats.reviewed} color="blue" />
+                <StatCard label="Refusees" value={stats.rejected} color="red" />
               </div>
             </div>
           )}
 
-          {/* Filtres */}
           <div>
             <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
               <Filter className="h-5 w-5" />
@@ -109,12 +84,13 @@ export default function ProtectedApplicationsPage() {
             </div>
           </div>
 
-          {/* Liste des candidatures */}
           <div>
             <h2 className="text-lg font-semibold text-gray-900 mb-4">
               {selectedStatus === 'ALL'
                 ? 'Toutes les candidatures'
-                : `Candidatures ${statusOptions.find((s) => s.value === selectedStatus)?.label.toLocaleLowerCase()}`}{' '}
+                : `Candidatures ${statusOptions
+                    .find((s) => s.value === selectedStatus)
+                    ?.label.toLocaleLowerCase()}`}{' '}
               ({filteredApplications.length})
             </h2>
 
@@ -125,16 +101,13 @@ export default function ProtectedApplicationsPage() {
                   Aucune candidature
                 </h3>
                 <p className="text-gray-600">
-                  Vous n'avez pas de candidature avec ce statut.
+                  Vous n&apos;avez pas de candidature avec ce statut.
                 </p>
               </div>
             ) : (
               <div className="space-y-4">
                 {filteredApplications.map((application) => (
-                  <ApplicationCard
-                    key={application.id}
-                    application={application}
-                  />
+                  <ApplicationCard key={application.id} application={application} />
                 ))}
               </div>
             )}

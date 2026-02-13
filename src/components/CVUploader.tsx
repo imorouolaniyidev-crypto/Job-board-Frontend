@@ -6,6 +6,7 @@ import { candidateApi } from '@/lib/api';
 import { toast } from 'sonner';
 import { Button } from './ui/button';
 import { Upload, File, Trash2 } from 'lucide-react';
+import axios from 'axios';
 
 interface CVUploaderProps {
   candidateId: string;
@@ -27,8 +28,11 @@ export default function CVUploader({ candidateId }: CVUploaderProps) {
       }
       toast.success('CV uploadé avec succès');
     },
-    onError: (error: any) => {
-      toast.error(error.response?.data?.message || 'Erreur lors de l\'upload du CV');
+    onError: (error: unknown) => {
+      const message = axios.isAxiosError(error)
+        ? error.response?.data?.message || error.message
+        : 'Erreur lors de l\'upload du CV';
+      toast.error(message);
     },
   });
 

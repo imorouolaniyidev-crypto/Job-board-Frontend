@@ -186,7 +186,7 @@ export default function JobListClient({
         <div className="mb-4 flex items-center justify-between">
           <div>
             <h2 className="text-lg font-semibold">
-              {filteredJobs.length} Jobes disponible{filteredJobs.length > 1 ? 's' : ''}
+              {filteredJobs.length} Job disponible{filteredJobs.length > 1 ? 's' : ''}
             </h2>
             <p className="text-sm text-muted-foreground">Trouvez une opportunite qui vous correspond</p>
           </div>
@@ -237,7 +237,7 @@ function getDescriptionText(job: JobUI): string {
     }
   }
 
-  for (const [key, value] of Object.entries(job as Record<string, unknown>)) {
+  for (const [key, value] of Object.entries(job as unknown as Record<string, unknown>)) {
     if (!/description|details|summary|content/i.test(key)) continue;
     if (typeof value === 'string' && value.trim()) {
       return value.trim();

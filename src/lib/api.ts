@@ -1,14 +1,28 @@
 import axios from 'axios';
-import { Candidate, Application, ApplicationStatus, DashboardStats, Job, UserProfile } from './types';
+import {
+  Candidate,
+  Application,
+  ApplicationStatus,
+  ConfirmationStatus,
+  DashboardStats,
+  Job,
+  UserProfile,
+} from './types';
 
 export const api = axios.create({
   // Utilise l'URL définie dans .env.local ou localhost par défaut
-  baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3030/api',
+  baseURL:
+    process.env.NEXT_PUBLIC_API_URL ||
+    process.env.NEXT_PUBLIC_API_BASE_URL ||
+    'http://localhost:3030/api',
   // Autoriser les cookies httpOnly du serveur à être envoyés automatiquement
   withCredentials: true,
 });
 
-const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3030/api';
+const apiBaseUrl =
+  process.env.NEXT_PUBLIC_API_URL ||
+  process.env.NEXT_PUBLIC_API_BASE_URL ||
+  'http://localhost:3030/api';
 const apiOrigin = apiBaseUrl.replace(/\/api\/?$/, '');
 
 function getStoredAuthToken(): string | null {
@@ -267,12 +281,16 @@ export const jobsApi = {
   getJobs: async (): Promise<Job[]> => {
     try {
       const response = await api.get('/jobs');
-      return normalizeCollectionPayload<Job>(response.data);
+      return normalizeCollectionPayload<Record<string, unknown>>(response.data).map((entry) =>
+        normalizeAdminJob(entry)
+      );
     } catch (firstError) {
       // Some backends expose /job instead of /jobs.
       try {
         const fallbackResponse = await api.get('/job');
-        return normalizeCollectionPayload<Job>(fallbackResponse.data);
+        return normalizeCollectionPayload<Record<string, unknown>>(fallbackResponse.data).map((entry) =>
+          normalizeAdminJob(entry)
+        );
       } catch {
         throw new Error(`Impossible de charger les offres: ${extractApiErrorMessage(firstError)}`);
       }
@@ -307,6 +325,14 @@ function normalizeCandidateStatus(value: unknown): Candidate['status'] {
     return normalized as Candidate['status'];
   }
   return 'ACTIVE';
+}
+
+function normalizeConfirmationStatus(value: unknown): ConfirmationStatus {
+  const normalized = String(value || '').trim().toUpperCase();
+  if (normalized === 'ACCEPTED' || normalized === 'REJECTED') {
+    return normalized as ConfirmationStatus;
+  }
+  return 'PENDING';
 }
 
 function asRecord(value: unknown): Record<string, unknown> | null {
@@ -417,11 +443,18 @@ function normalizeCandidateEntity(payload: unknown): Candidate | null {
     phone: profileRecord.phone ? String(profileRecord.phone) : undefined,
     skills,
     experience: String(profileRecord.experience ?? profileRecord.experiences ?? '') || undefined,
-    cvUrl: String(profileRecord.cvUrl ?? profileRecord.cv_url ?? '') || undefined,
+    cvUrl: String(profileRecord.cvUrl ?? profileRecord.cv_url ?? profileRecord.cv ?? '') || undefined,
     profileData: buildProfileData(record, profileRecord),
     status: normalizeCandidateStatus(profileRecord.status ?? record.status),
+    confirmationStatus: normalizeConfirmationStatus(
+      profileRecord.confirmationStatus ?? profileRecord.confirmation_status ?? record.confirmationStatus
+    ),
     createdAt: String(
-      profileRecord.createdAt ?? profileRecord.created_at ?? record.createdAt ?? new Date().toISOString()
+      profileRecord.createdAt ??
+        profileRecord.created_at ??
+        userRecord?.createdAt ??
+        record.createdAt ??
+        new Date().toISOString()
     ),
     updatedAt: String(
       profileRecord.updatedAt ?? profileRecord.updated_at ?? record.updatedAt ?? new Date().toISOString()
@@ -467,57 +500,7 @@ export const candidatesApi = {
 
 function normalizeUserProfilePayload(payload: unknown): UserProfile {
   const toRecord = (value: unknown): Record<string, unknown> =>
-    value && typeof value === 'object' && !Array.isArray(value)
-      ? (value as Record<string, unknown>)
-      : {};
-
-  const getConnectedUser = (): { id?: string; email?: string } => {
-    if (typeof window === 'undefined') return {};
-    try {
-      const raw = localStorage.getItem('user');
-      if (!raw) return {};
-      const parsed = JSON.parse(raw) as { id?: string; email?: string };
-      return {
-        id: parsed?.id,
-        email: parsed?.email?.toLowerCase(),
-      };
-    } catch {
-      return {};
-    }
-  };
-
-  const connectedUser = getConnectedUser();
-
-  const scoreProfileMatch = (entry: Record<string, unknown>): number => {
-    const user = toRecord(entry.user);
-    const profile = toRecord(entry.profile);
-
-    const candidateId = String(
-      profile.user_id ?? profile.userId ?? user.id ?? entry.user_id ?? entry.userId ?? ''
-    );
-    const candidateEmail = String(
-      user.email ?? user.user_email ?? entry.email ?? entry.user_email ?? profile.email ?? profile.user_email ?? ''
-    ).toLowerCase();
-
-    let score = 0;
-    if (connectedUser.id && candidateId && connectedUser.id === candidateId) score += 2;
-    if (connectedUser.email && candidateEmail && connectedUser.email === candidateEmail) score += 2;
-    return score;
-  };
-
-  const pickBestEntry = (entries: Record<string, unknown>[]): Record<string, unknown> => {
-    if (entries.length === 0) return {};
-    let best = entries[0];
-    let bestScore = scoreProfileMatch(best);
-    for (const entry of entries.slice(1)) {
-      const score = scoreProfileMatch(entry);
-      if (score > bestScore) {
-        best = entry;
-        bestScore = score;
-      }
-    }
-    return best;
-  };
+    value && typeof value === 'object' && !Array.isArray(value) ? (value as Record<string, unknown>) : {};
 
   const pickString = (source: Record<string, unknown>, keys: string[]): string => {
     for (const key of keys) {
@@ -528,37 +511,16 @@ function normalizeUserProfilePayload(payload: unknown): UserProfile {
     return '';
   };
 
-  const payloadRecord = toRecord(payload);
-  const listCandidates = [
-    Array.isArray(payload) ? payload : null,
-    Array.isArray(payloadRecord.data) ? payloadRecord.data : null,
-    Array.isArray(payloadRecord.profiles) ? payloadRecord.profiles : null,
-    Array.isArray(payloadRecord.items) ? payloadRecord.items : null,
-  ].filter((item): item is unknown[] => Array.isArray(item));
+  const root = toRecord(payload);
+  const profile = toRecord(root.profile ?? root.data ?? root);
+  const user = toRecord(root.user ?? (root.data as Record<string, unknown> | undefined)?.user);
 
-  const selectedEntry = listCandidates.length > 0
-    ? pickBestEntry(listCandidates[0].map((item) => toRecord(item)).filter((item) => Object.keys(item).length > 0))
-    : {};
-
-  const root = Object.keys(selectedEntry).length > 0 ? selectedEntry : payload;
-  const record = toRecord(root);
-  const data = toRecord(record.data);
-  const profileCandidate =
-    data.profile ??
-    record.profile ??
-    (Object.keys(data).length > 0 ? data : record);
-  const profile = Array.isArray(profileCandidate)
-    ? toRecord(profileCandidate[0])
-    : toRecord(profileCandidate);
-  const user = toRecord(data.user || record.user || profile.user);
-
-  const competencesRaw = profile.competences ?? profile.skills ?? profile.competence;
+  const competencesRaw = profile.competences ?? profile.skills;
   const competences = Array.isArray(competencesRaw)
     ? competencesRaw.map((item) => String(item)).filter(Boolean).join(', ')
-    : typeof competencesRaw === 'string'
-      ? competencesRaw
-      : '';
-  const rawCvUrl = pickString(profile, ['cv_url', 'cvUrl', 'cv', 'resume', 'resume_url']);
+    : String(competencesRaw ?? '');
+
+  const rawCvUrl = pickString(profile, ['cv', 'cv_url', 'cvUrl']);
   const normalizedCvUrl =
     rawCvUrl && /^https?:\/\//i.test(rawCvUrl)
       ? rawCvUrl
@@ -574,9 +536,9 @@ function normalizeUserProfilePayload(payload: unknown): UserProfile {
     email:
       pickString(user, ['email', 'user_email']) ||
       pickString(profile, ['email', 'user_email']) ||
-      pickString(record, ['email', 'user_email']),
-    experiences: pickString(profile, ['experiences', 'experience', 'description', 'bio', 'about']),
-    formations: pickString(profile, ['formations', 'formation', 'education']),
+      pickString(root, ['email', 'user_email']),
+    experiences: pickString(profile, ['experiences', 'experience']),
+    formations: pickString(profile, ['formations', 'formation']),
     competences,
     cv_url: normalizedCvUrl,
     cv_filename:
@@ -680,88 +642,31 @@ function getProfileEmail(profile: Record<string, unknown>): string {
 
 export const profileApi = {
   getMyProfile: async (): Promise<UserProfile> => {
-    let connectedId = '';
-    let connectedEmail = '';
-    const connectedUser: { id?: string; email?: string } = {};
-
     try {
-      const meResponse = await api.get('/auth/me');
-      const meRecord = (meResponse.data && typeof meResponse.data === 'object'
-        ? (meResponse.data as Record<string, unknown>)
-        : {}) as Record<string, unknown>;
-      const meUser = (meRecord.user && typeof meRecord.user === 'object'
-        ? (meRecord.user as Record<string, unknown>)
-        : meRecord) as Record<string, unknown>;
-      connectedId = String(meUser.id ?? meUser.user_id ?? '');
-      connectedEmail = String(meUser.email ?? '').toLowerCase();
-      connectedUser.id = connectedId || undefined;
-      connectedUser.email = connectedEmail || undefined;
-    } catch {
-      if (typeof window !== 'undefined') {
-        try {
-          const raw = localStorage.getItem('user');
-          if (raw) {
-            const parsed = JSON.parse(raw) as { id?: string; email?: string };
-            connectedId = String(parsed.id ?? '');
-            connectedEmail = String(parsed.email ?? '').toLowerCase();
-            connectedUser.id = connectedId || undefined;
-            connectedUser.email = connectedEmail || undefined;
-          }
-        } catch {
-          // Ignore parse failure.
-        }
+      const response = await api.get('/profile/me');
+      const normalized = normalizeUserProfilePayload(response.data?.profile ?? response.data);
+      return normalized;
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response?.status === 404) {
+        const meResponse = await api.get('/auth/me');
+        const meUser = (meResponse.data?.user ?? {}) as { id?: string | number; email?: string };
+        return {
+          user_id: String(meUser.id ?? ''),
+          first_name: '',
+          last_name: '',
+          phone: '',
+          email: meUser.email || '',
+          experiences: '',
+          formations: '',
+          competences: '',
+          cv_url: undefined,
+          cv_filename: undefined,
+          created_at: undefined,
+          updated_at: undefined,
+        };
       }
+      throw error;
     }
-
-    if ((!connectedId && !connectedEmail) && typeof window !== 'undefined') {
-      try {
-        const token =
-          localStorage.getItem('auth_token') ||
-          localStorage.getItem('token') ||
-          localStorage.getItem('accessToken') ||
-          localStorage.getItem('access_token') ||
-          localStorage.getItem('jwt');
-        if (token) {
-          const parts = token.split('.');
-          if (parts.length >= 2) {
-            const base64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
-            const normalized = base64 + '='.repeat((4 - (base64.length % 4)) % 4);
-            const payloadJson = atob(normalized);
-            const jwtPayload = JSON.parse(payloadJson) as Record<string, unknown>;
-            connectedId = String(jwtPayload.id ?? jwtPayload.userId ?? jwtPayload.user_id ?? jwtPayload.sub ?? '');
-            connectedEmail = String(jwtPayload.email ?? '').toLowerCase();
-            connectedUser.id = connectedId || undefined;
-            connectedUser.email = connectedEmail || undefined;
-          }
-        }
-      } catch {
-        // Ignore JWT decode failure.
-      }
-    }
-
-    if (!connectedId && !connectedEmail) {
-      throw new Error('Utilisateur connecte introuvable. Veuillez vous reconnecter.');
-    }
-
-    const publicProfiles = await api.get('/public/profiles');
-    const entries = extractProfilesPayload(publicProfiles.data);
-    const matched = entries.find((entry) => {
-      const entryId = getProfileUserId(entry);
-      const entryEmail = getProfileEmail(entry);
-      if (connectedId && entryId && connectedId === entryId) return true;
-      if (connectedEmail && entryEmail && connectedEmail === entryEmail) return true;
-      return false;
-    });
-
-    if (!matched) {
-      throw new Error('Profil du user connecte introuvable dans /public/profiles');
-    }
-
-    const fromPublic = normalizeUserProfilePayload(matched);
-    if (!hasProfileDetails(fromPublic)) {
-      throw new Error('Le profil trouve est vide/incomplet dans /public/profiles');
-    }
-    return mergeUserProfile(fromPublic, fromPublic, connectedUser);
   },
   updateMyProfile: async (payload: UserProfile, cvFile?: File): Promise<UserProfile> => {
     const formData = new FormData();
@@ -797,27 +702,101 @@ export const adminApi = {
   },
 
   // Jobs Management
-  getJobs: async (page?: number, limit?: number): Promise<{ data: Job[]; total: number }> => {
-    const response = await api.get('/admin/jobs', { params: { page, limit } });
-    return response.data;
+  getJobs: async (filters?: {
+    page?: number;
+    limit?: number;
+    search?: string;
+    type?: 'ALL' | 'CDI' | 'CDD';
+    source?: 'ALL' | 'INTERNAL' | 'EXTERNAL';
+    status?: 'ALL' | 'ACTIVE' | 'INACTIVE';
+  }): Promise<{ data: Job[]; total: number }> => {
+    const response = await api.get('/admin/jobs', { params: filters });
+    const list = normalizeCollectionPayload<Record<string, unknown>>(response.data).map((entry) =>
+      normalizeAdminJob(entry)
+    );
+    const payloadTotal = Number((response.data as { total?: number })?.total);
+    return { data: list, total: Number.isFinite(payloadTotal) ? payloadTotal : list.length };
   },
 
   getJob: async (jobId: string): Promise<Job> => {
-    const response = await api.get(`/admin/jobs/${jobId}`);
-    return response.data;
+    const response = await api.get(`/jobs/${jobId}`);
+    return normalizeAdminJob((response.data ?? {}) as Record<string, unknown>);
   },
 
   createJob: async (data: Omit<Job, 'id' | 'createdAt' | 'updatedAt' | 'createdBy'>): Promise<Job> => {
-    const response = await api.post('/admin/jobs', data);
-    return response.data;
+    const response = await api.post('/jobs', toAdminJobPayload(data));
+    return normalizeAdminJob((response.data ?? {}) as Record<string, unknown>);
   },
 
   updateJob: async (jobId: string, data: Partial<Job>): Promise<Job> => {
-    const response = await api.put(`/admin/jobs/${jobId}`, data);
-    return response.data;
+    const response = await api.put(`/jobs/${jobId}`, toAdminJobPayload(data));
+    return normalizeAdminJob((response.data ?? {}) as Record<string, unknown>);
   },
 
   deleteJob: async (jobId: string): Promise<void> => {
-    await api.delete(`/admin/jobs/${jobId}`);
+    await api.delete(`/jobs/${jobId}`);
+  },
+
+  getCandidates: async (): Promise<Candidate[]> => {
+    const response = await api.get('/profiles');
+    return normalizeCandidatesPayload(response.data);
+  },
+
+  getPendingCandidatures: async (): Promise<Candidate[]> => {
+    const response = await api.get('/admin/candidatures/pending');
+    return normalizeCandidatesPayload(response.data);
+  },
+
+  confirmCandidature: async (profileId: string, status: ConfirmationStatus): Promise<void> => {
+    await api.patch(`/admin/candidatures/${profileId}/confirmation`, { status });
   },
 };
+
+function toAdminJobPayload(data: Partial<Job>): Record<string, unknown> {
+  return {
+    title: data.title,
+    companyName: data.companyName || data.company_name || data.company,
+    companyLogo: data.company_logo,
+    description: data.description,
+    location: data.location,
+    type: data.type,
+    source: normalizeJobSourceForRequest(data.source),
+    isActive: data.is_active,
+  };
+}
+
+function normalizeJobSourceForRequest(source: unknown): 'INTERNAL' | 'EXTERNAL' | undefined {
+  const normalized = String(source || '').trim().toUpperCase();
+  if (normalized === 'SCRAPED' || normalized === 'EXTERNAL') return 'EXTERNAL';
+  if (normalized === 'INTERNAL') return 'INTERNAL';
+  return undefined;
+}
+
+function normalizeJobSourceForResponse(source: unknown): Job['source'] {
+  const normalized = String(source || '').trim().toUpperCase();
+  if (normalized === 'SCRAPED' || normalized === 'EXTERNAL') return 'EXTERNAL';
+  return 'INTERNAL';
+}
+
+function normalizeJobTypeForResponse(type: unknown): Job['type'] {
+  const normalized = String(type || '').trim().toUpperCase();
+  if (normalized === 'CDD') return 'CDD';
+  return 'CDI';
+}
+
+function normalizeAdminJob(payload: Record<string, unknown>): Job {
+  return {
+    id: String(payload.id ?? ''),
+    title: String(payload.title ?? ''),
+    company_name: String(payload.companyName ?? payload.company_name ?? payload.company ?? ''),
+    companyName: String(payload.companyName ?? payload.company_name ?? payload.company ?? ''),
+    company_logo: String(payload.companyLogo ?? payload.company_logo ?? '') || undefined,
+    description: String(payload.description ?? ''),
+    location: String(payload.location ?? '') || undefined,
+    source: normalizeJobSourceForResponse(payload.source),
+    type: normalizeJobTypeForResponse(payload.type),
+    is_active: Boolean(payload.isActive ?? payload.is_active ?? true),
+    createdAt: String(payload.createdAt ?? payload.created_at ?? new Date().toISOString()),
+    updatedAt: String(payload.updatedAt ?? payload.updated_at ?? new Date().toISOString()),
+  };
+}

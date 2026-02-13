@@ -3,6 +3,7 @@
 // Types pour le profil candidat
 export type ApplicationStatus = 'PENDING' | 'REVIEWED' | 'REJECTED';
 export type CandidateStatus = 'ACTIVE' | 'REVIEWING' | 'REJECTED';
+export type ConfirmationStatus = 'PENDING' | 'ACCEPTED' | 'REJECTED';
 
 // Profil utilisateur (champs texte simples)
 export interface UserProfile {
@@ -42,6 +43,7 @@ export interface Candidate {
   cvUrl?: string;
   profileData?: Record<string, unknown>;
   status: CandidateStatus;
+  confirmationStatus?: ConfirmationStatus;
   createdAt: string;
   updatedAt: string;
   applicationsCount?: number;
@@ -111,6 +113,20 @@ export interface DashboardStats {
   jobsPostedThisMonth: number;
   applicationsThisMonth: number;
   averageApplicationsPerJob: number;
+  candidateConfirmation?: {
+    pending: number;
+    accepted: number;
+    rejected: number;
+  };
+  jobsByType?: {
+    CDI: number;
+    CDD: number;
+  };
+  jobsBySource?: {
+    INTERNAL: number;
+    EXTERNAL: number;
+  };
+  generatedAt?: string;
 }
 
 export interface StatisticCard {

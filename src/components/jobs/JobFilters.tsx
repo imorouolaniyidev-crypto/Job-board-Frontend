@@ -31,7 +31,6 @@ export default function JobFilters({ initial = { q: "", type: "", location: "" }
 					<option value="">Tous types</option>
 					<option value="CDI">CDI</option>
 					<option value="CDD">CDD</option>
-					<option value="Stage">Stage</option>
 				</select>
 
 				<input

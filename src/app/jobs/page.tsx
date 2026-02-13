@@ -5,12 +5,14 @@ import JobFilters from '@/components/jobs/JobFilters';
 export default function JobsPage() {
   return (
     <main className="container mx-auto p-6">
-      <div className="bg-[#2c3e6e] text-white rounded-lg p-8 mb-6 text-center">
-        <h1 className="text-3xl font-bold mb-2">Découvrez nos offres d'emploi</h1>
-        <p className="text-sm opacity-90 mx-auto max-w-2xl">Trouvez l'opportunité qui correspond à vos compétences et aspirations professionnelles</p>
+      <div className="mb-6 rounded-lg bg-[#2c3e6e] p-8 text-center text-white">
+        <h1 className="mb-2 text-3xl font-bold">Decouvrez nos offres d&apos;emploi</h1>
+        <p className="mx-auto max-w-2xl text-sm opacity-90">
+          Trouvez l&apos;opportunite qui correspond a vos competences et aspirations professionnelles
+        </p>
       </div>
 
-      <div className="bg-card p-6 rounded-lg shadow-sm mb-6">
+      <div className="mb-6 rounded-lg bg-card p-6 shadow-sm">
         <JobFilters initial={{ q: '', type: '', location: '' }} />
       </div>
 

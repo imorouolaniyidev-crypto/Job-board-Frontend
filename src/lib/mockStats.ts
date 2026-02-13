@@ -9,8 +9,7 @@ export const mockDashboardStats: DashboardStats = {
   totalApplications: 456,
   applicationsByStatus: {
     PENDING: 145,
-    IN_PROGRESS: 189,
-    ACCEPTED: 89,
+    REVIEWED: 278,
     REJECTED: 33,
   },
   jobsPostedThisMonth: 12,

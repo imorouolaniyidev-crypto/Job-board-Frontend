@@ -33,7 +33,7 @@ export default function DeleteJobModal({ job, onConfirm, onCancel }: DeleteJobMo
 						<div className="p-2 rounded-lg bg-red-100 dark:bg-red-900">
 							<AlertTriangle size={24} className="text-red-600 dark:text-red-400" />
 						</div>
-						<h2 className="text-lg font-bold text-gray-900 dark:text-white">Supprimer l'offre</h2>
+						<h2 className="text-lg font-bold text-gray-900 dark:text-white">Supprimer l&apos;offre</h2>
 					</div>
 					<button
 						onClick={onCancel}

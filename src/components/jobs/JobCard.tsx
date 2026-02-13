@@ -28,9 +28,9 @@ type JobCardData = {
 
 export default function JobCard({ job }: { job: JobCardData }) {
   const companyName = job.company_name || job.companyName || job.company || '';
-  const logo = job.company_logo || job.companyLogo || null;
-  const createdAt = job.created_at || job.createdAt || job.created || null;
-  const source = job.source || job.applyUrl || job.apply_url || null;
+  const logo = job.company_logo || job.companyLogo || undefined;
+  const createdAt = job.created_at || job.createdAt || job.created || undefined;
+  const source = job.source || job.applyUrl || job.apply_url || undefined;
   const contractType = job.type || job.jobType || '';
   const description = getDescriptionText(job);
   const extraDetails = getAdditionalDetails(job);
@@ -252,7 +252,10 @@ function isValidUrl(s: unknown) {
 
 function formatDate(s: unknown) {
   try {
-    const d = new Date(s);
+    const input =
+      typeof s === 'string' || typeof s === 'number' || s instanceof Date ? s : undefined;
+    if (!input) return '';
+    const d = new Date(input);
     return d.toLocaleDateString('fr-FR');
   } catch {
     return String(s);

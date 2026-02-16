@@ -12,8 +12,8 @@ export default function AdminPage() {
   }, [router]);
 
   return (
-    <div className="flex h-screen items-center justify-center">
-      <p className="text-gray-600 dark:text-gray-400">Redirection...</p>
+    <div className="flex h-screen items-center justify-center bg-gradient-to-br from-white to-[rgb(18,51,119)]/10">
+      <p className="text-[rgb(18,51,119)]/75">Redirection...</p>
     </div>
   );
 }

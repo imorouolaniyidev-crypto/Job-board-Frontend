@@ -149,6 +149,26 @@ function buildCookieHeaderFromSetCookie(response: Response): string {
     .join('; ');
 }
 
+function extractCookieValueFromSetCookie(response: Response, cookieName: string): string | null {
+  const headersWithGetSetCookie = response.headers as Headers & {
+    getSetCookie?: () => string[];
+  };
+
+  const setCookies = headersWithGetSetCookie.getSetCookie?.() ?? [];
+  const candidates = setCookies.length > 0 ? setCookies : [response.headers.get('set-cookie') || ''];
+
+  for (const raw of candidates) {
+    const firstPart = raw.split(';')[0]?.trim();
+    if (!firstPart) continue;
+    const [name, ...rest] = firstPart.split('=');
+    if (name === cookieName) {
+      return rest.join('=').trim() || null;
+    }
+  }
+
+  return null;
+}
+
 export async function POST(request: Request) {
   try {
     const body = await request.json();
@@ -167,7 +187,7 @@ export async function POST(request: Request) {
       return NextResponse.json(
         {
           message:
-            "Configuration manquante: définis API_URL (ou NEXT_PUBLIC_API_URL) vers l'API backend.",
+            "Configuration manquante: definis API_URL (ou NEXT_PUBLIC_API_URL / NEXT_PUBLIC_API_BASE_URL) vers l'API backend.",
         },
         { status: 500 }
       );
@@ -260,21 +280,6 @@ export async function POST(request: Request) {
         backendData && typeof backendData === 'object'
           ? Object.keys(backendData as Record<string, unknown>)
           : [];
-      const isDev = process.env.NODE_ENV !== 'production';
-      const hasOnlyMessageKey = payloadKeys.length === 1 && payloadKeys[0] === 'message';
-
-      // Backend sometimes returns only { message: "..." } on successful login (no role/token).
-      // In dev mode, allow admin session creation to unblock local work.
-      if (isDev && hasOnlyMessageKey) {
-        isAdmin = true;
-      }
-    }
-
-    if (!isAdmin) {
-      const payloadKeys =
-        backendData && typeof backendData === 'object'
-          ? Object.keys(backendData as Record<string, unknown>)
-          : [];
       const debugSuffix =
         process.env.NODE_ENV !== 'production' && payloadKeys.length > 0
           ? ` (debug keys: ${payloadKeys.join(', ')})`
@@ -285,7 +290,31 @@ export async function POST(request: Request) {
       );
     }
 
+    const accessTokenFromCookie = extractCookieValueFromSetCookie(backendResponse, 'access_token');
+    const accessTokenFromPayload = extractTokenFromPayload(backendData);
+    const accessToken = accessTokenFromCookie || accessTokenFromPayload;
+
+    if (!accessToken) {
+      return NextResponse.json(
+        {
+          message:
+            "Connexion admin impossible: token d'authentification backend introuvable. Reessayez apres deconnexion.",
+        },
+        { status: 502 }
+      );
+    }
+
     const response = NextResponse.json({ success: true });
+    response.cookies.set({
+      name: 'access_token',
+      value: accessToken,
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      path: '/',
+      maxAge: 60 * 60 * 24,
+    });
+
     response.cookies.set({
       name: ADMIN_SESSION_COOKIE,
       value: getAdminSessionValue(),

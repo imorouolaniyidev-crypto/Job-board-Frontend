@@ -27,7 +27,7 @@ export async function POST(request: Request) {
   }
 
   const response = NextResponse.json({ success: true });
-  const cookieNames = ['token', 'refreshToken', 'accessToken', 'jwt'];
+  const cookieNames = ['access_token', 'token', 'refreshToken', 'accessToken', 'jwt', 'userRole'];
 
   for (const name of cookieNames) {
     response.cookies.set({

@@ -21,6 +21,7 @@ export default function RegisterPage() {
   const router = useRouter();
   const user = useAuthStore((state) => state.user);
   const setAuth = useAuthStore((state) => state.setAuth);
+  const fetchMe = useAuthStore((state) => state.fetchMe);
   const [loading, setLoading] = useState(false);
   const role: 'ADMIN' | 'CANDIDATE' = 'CANDIDATE';
   const [termsAccepted, setTermsAccepted] = useState(false);
@@ -72,6 +73,16 @@ export default function RegisterPage() {
 
       if (createdUser) {
         setAuth(createdUser);
+      } else {
+        await fetchMe({ ignoreForceLogout: true });
+      }
+
+      const sessionUser = useAuthStore.getState().user;
+      if (!sessionUser) {
+        newErrors.email = 'Inscription ok mais session introuvable. Veuillez vous reconnecter.';
+        setErrors(newErrors);
+        toast.error('Inscription effectuee, mais connexion automatique impossible.');
+        return;
       }
 
       toast.success('Compte cree avec succes !');
@@ -98,7 +109,13 @@ export default function RegisterPage() {
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-slate-100">
       <nav className="sticky top-0 z-50 bg-white/95 shadow backdrop-blur">
         <div className="container mx-auto flex items-center justify-between p-4">
-         qaé&
+          <img
+            src="/JobBooster-Enterprises-ENG-FullColor.png"
+            width={200}
+            height={50}
+            className="object-contain"
+            alt="logo_job-booster"
+          />
           <ul className="flex items-center space-x-5 text-base font-semibold text-[#0a1530] md:text-[17px]">
             <Link href="/" className="flex cursor-pointer items-center gap-1.5 hover:underline">
               <Home size={16} />

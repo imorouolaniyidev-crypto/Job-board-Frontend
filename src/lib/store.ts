@@ -46,7 +46,11 @@ export const useAuthStore = create<AuthState>((set) => ({
         return;
       }
 
-      const baseUrl = process.env.NEXT_PUBLIC_API_URL?.replace(/\/+$/, '') || '';
+      const baseUrl =
+        (process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || '').replace(
+          /\/+$/,
+          ''
+        );
       const meUrl = baseUrl ? `${baseUrl}/auth/me` : '/api/auth/me';
       const res = await fetch(meUrl, {
         credentials: 'include',

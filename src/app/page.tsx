@@ -79,7 +79,6 @@ export default function JobsPage() {
           <div className="mt-6 flex items-center justify-center gap-3">
             <span className="rounded-full bg-white/15 px-3 py-1 text-xs md:text-sm">CDI</span>
             <span className="rounded-full bg-white/15 px-3 py-1 text-xs md:text-sm">CDD</span>
-            <span className="rounded-full bg-white/15 px-3 py-1 text-xs md:text-sm">Stage</span>
             <span className="rounded-full bg-white/15 px-3 py-1 text-xs md:text-sm">Remote</span>
           </div>
         </div>

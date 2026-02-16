@@ -42,16 +42,18 @@ export default function AdminLoginPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-slate-50 p-4">
-      <Card className="w-full max-w-md">
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-white to-[rgb(18,51,119)]/10 p-4">
+      <Card className="w-full max-w-md border-[rgb(18,51,119)]/20">
         <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold">Connexion Admin</CardTitle>
-          <CardDescription>Acces reserve a l&apos;espace administrateur</CardDescription>
+          <CardTitle className="text-2xl font-bold text-[rgb(18,51,119)]">Connexion Admin</CardTitle>
+          <CardDescription className="text-[rgb(18,51,119)]/70">
+            Acces reserve a l&apos;espace administrateur
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4" noValidate>
             <div className="space-y-2">
-              <Label htmlFor="email">Email admin</Label>
+              <Label htmlFor="email" className="text-[rgb(18,51,119)]">Email admin</Label>
               <Input
                 id="email"
                 type="email"
@@ -62,7 +64,7 @@ export default function AdminLoginPage() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">Mot de passe</Label>
+              <Label htmlFor="password" className="text-[rgb(18,51,119)]">Mot de passe</Label>
               <Input
                 id="password"
                 type="password"
@@ -71,8 +73,12 @@ export default function AdminLoginPage() {
                 required
               />
             </div>
-            {error ? <p className="text-sm text-red-600">{error}</p> : null}
-            <Button type="submit" className="w-full" disabled={loading}>
+            {error ? <p className="text-sm text-[rgb(249,153,28)]">{error}</p> : null}
+            <Button
+              type="submit"
+              className="w-full bg-[rgb(249,153,28)] text-white hover:bg-[rgb(249,153,28)]/90"
+              disabled={loading}
+            >
               {loading ? 'Connexion...' : 'Se connecter'}
             </Button>
           </form>

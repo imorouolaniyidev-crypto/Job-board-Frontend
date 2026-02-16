@@ -38,19 +38,24 @@ export default function CandidatesPage() {
     staleTime: 60 * 1000,
   });
 
+  const acceptedCandidates = useMemo(
+    () => candidates.filter((candidate) => candidate.confirmationStatus === "ACCEPTED"),
+    [candidates]
+  );
+
   const availableSkills = useMemo(() => {
     const set = new Set();
-    candidates.forEach((candidate) => {
+    acceptedCandidates.forEach((candidate) => {
       (candidate.skills || []).forEach((skill) => {
         if (skill) set.add(String(skill).trim());
       });
     });
     return Array.from(set).sort((a, b) => a.localeCompare(b));
-  }, [candidates]);
+  }, [acceptedCandidates]);
 
   const filteredCandidates = useMemo(() => {
     const keyword = q.trim().toLowerCase();
-    const list = candidates.filter((candidate) => {
+    const list = acceptedCandidates.filter((candidate) => {
       const fullName = `${candidate.firstName || ""} ${candidate.lastName || ""}`.toLowerCase();
       const email = String(candidate.email || "").toLowerCase();
       const skills = (candidate.skills || []).map((s) => String(s).toLowerCase());
@@ -74,15 +79,15 @@ export default function CandidatesPage() {
     });
 
     return list;
-  }, [candidates, q, skillFilter, statusFilter, sort]);
+  }, [acceptedCandidates, q, skillFilter, statusFilter, sort]);
 
   const stats = useMemo(() => {
-    const total = candidates.length;
-    const active = candidates.filter((c) => c.status === "ACTIVE").length;
-    const reviewing = candidates.filter((c) => c.status === "REVIEWING").length;
-    const rejected = candidates.filter((c) => c.status === "REJECTED").length;
+    const total = acceptedCandidates.length;
+    const active = acceptedCandidates.filter((c) => c.status === "ACTIVE").length;
+    const reviewing = acceptedCandidates.filter((c) => c.status === "REVIEWING").length;
+    const rejected = acceptedCandidates.filter((c) => c.status === "REJECTED").length;
     return { total, active, reviewing, rejected };
-  }, [candidates]);
+  }, [acceptedCandidates]);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-slate-100">

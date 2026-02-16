@@ -42,7 +42,10 @@ export default function CVUploadSection({
     const raw = currentCV?.url?.trim();
     if (!raw) return undefined;
     if (/^https?:\/\//i.test(raw)) return raw;
-    const apiBase = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3030/api';
+    const apiBase =
+      process.env.NEXT_PUBLIC_API_URL ||
+      process.env.NEXT_PUBLIC_API_BASE_URL ||
+      'http://localhost:3030/api';
     const apiOrigin = apiBase.replace(/\/api\/?$/, '');
     return `${apiOrigin}${raw.startsWith('/') ? '' : '/'}${raw}`;
   })();

@@ -20,7 +20,7 @@ export default function JobForm({ job, onSave, onCancel }: JobFormProps) {
 	const [location, setLocation] = useState(job?.location || '');
 	const [jobType, setJobType] = useState<JobType>(job?.type || 'CDI');
 	const [source, setSource] = useState<JobSource>(job?.source || 'INTERNAL');
-	const [sourceUrl, setSourceUrl] = useState(job?.source_url || '');
+	const [sourceUrl, setSourceUrl] = useState(job?.source_url || job?.apply_url || '');
 	const [isActive, setIsActive] = useState(job?.is_active ?? true);
 	const [errors, setErrors] = useState<Record<string, string>>({});
 	const [isSubmitting, setIsSubmitting] = useState(false);
@@ -33,7 +33,7 @@ export default function JobForm({ job, onSave, onCancel }: JobFormProps) {
 		if (!description.trim()) newErrors.description = 'La description est requise';
 		if (!location.trim()) newErrors.location = 'Le lieu est requis';
 		if (source === 'EXTERNAL' && !sourceUrl.trim()) newErrors.source_url = 'L\'URL est requise pour les offres externes';
-		if (source === 'EXTERNAL' && sourceUrl && !isValidUrl(sourceUrl)) newErrors.source_url = 'L\'URL n\'est pas valide';
+		if (sourceUrl.trim() && !isValidUrl(sourceUrl)) newErrors.source_url = 'L\'URL n\'est pas valide';
 		if (title.length < 3) newErrors.title = 'Le titre doit contenir au moins 3 caractères';
 		if (description.length < 10) newErrors.description = 'La description doit contenir au moins 10 caractères';
 
@@ -41,10 +41,19 @@ export default function JobForm({ job, onSave, onCancel }: JobFormProps) {
 		return Object.keys(newErrors).length === 0;
 	};
 
+	const normalizeUrlInput = (url: string): string => {
+		const trimmed = url.trim();
+		if (!trimmed) return '';
+		return /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
+	};
+
 	const isValidUrl = (url: string): boolean => {
+		const normalized = normalizeUrlInput(url);
+		if (!normalized) return false;
+
 		try {
-			new URL(url);
-			return true;
+			const parsed = new URL(normalized);
+			return parsed.protocol === 'http:' || parsed.protocol === 'https:';
 		} catch {
 			return false;
 		}
@@ -68,7 +77,7 @@ export default function JobForm({ job, onSave, onCancel }: JobFormProps) {
 				location,
 				type: jobType,
 				source,
-				source_url: source === 'EXTERNAL' ? sourceUrl : undefined,
+				source_url: normalizeUrlInput(sourceUrl),
 				is_active: isActive,
 			});
 		} finally {
@@ -218,26 +227,24 @@ export default function JobForm({ job, onSave, onCancel }: JobFormProps) {
 						</div>
 					</div>
 
-					{/* URL de l'offre externe (conditionnel) */}
-					{source === 'EXTERNAL' && (
-						<div>
-							<label className="block text-sm font-medium text-gray-900 dark:text-white mb-2">
-								URL de l&apos;offre externe *
-							</label>
-							<input
-								type="url"
-								value={sourceUrl}
-								onChange={e => setSourceUrl(e.target.value)}
-								placeholder="ex: https://www.linkedin.com/jobs/view/..."
-								className={`w-full px-4 py-2 rounded-lg border ${
-									errors.source_url
-										? 'border-red-500 dark:border-red-400'
-										: 'border-gray-300 dark:border-gray-600'
-								} bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500`}
-							/>
-							{errors.source_url && <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.source_url}</p>}
-						</div>
-					)}
+					{/* URL de l'offre (interne ou externe) */}
+					<div>
+						<label className="block text-sm font-medium text-gray-900 dark:text-white mb-2">
+							URL de l&apos;offre (obligatoire pour externe)
+						</label>
+						<input
+							type="url"
+							value={sourceUrl}
+							onChange={e => setSourceUrl(e.target.value)}
+							placeholder="ex: https://example.com/offres/123"
+							className={`w-full px-4 py-2 rounded-lg border ${
+								errors.source_url
+									? 'border-red-500 dark:border-red-400'
+									: 'border-gray-300 dark:border-gray-600'
+							} bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500`}
+						/>
+						{errors.source_url && <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.source_url}</p>}
+					</div>
 
 					{/* Active Status */}
 					<div className="flex items-center gap-3 p-3 rounded-lg bg-gray-50 dark:bg-gray-700">

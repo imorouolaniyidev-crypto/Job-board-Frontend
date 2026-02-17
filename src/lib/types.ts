@@ -81,6 +81,7 @@ export interface Job {
   location?: string;
   source: JobSource;
   source_url?: string;
+  sourceUrl?: string;
   type: JobType;
   jobType?: string;
   applyUrl?: string;

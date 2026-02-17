@@ -20,6 +20,8 @@ type JobCardData = {
   createdAt?: string;
   created?: string;
   source?: string;
+  sourceUrl?: string;
+  source_url?: string;
   applyUrl?: string;
   apply_url?: string;
   type?: string;
@@ -30,7 +32,7 @@ export default function JobCard({ job }: { job: JobCardData }) {
   const companyName = job.company_name || job.companyName || job.company || '';
   const logo = job.company_logo || job.companyLogo || undefined;
   const createdAt = job.created_at || job.createdAt || job.created || undefined;
-  const source = job.source || job.applyUrl || job.apply_url || undefined;
+  const applyLink = job.source_url || job.sourceUrl || job.applyUrl || job.apply_url || undefined;
   const contractType = job.type || job.jobType || '';
   const description = getDescriptionText(job);
   const extraDetails = getAdditionalDetails(job);
@@ -125,9 +127,9 @@ export default function JobCard({ job }: { job: JobCardData }) {
                   Voir detail
                 </Link>
 
-                {isValidUrl(source) ? (
+                {isValidUrl(applyLink) ? (
                   <a
-                    href={source}
+                    href={applyLink}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex h-10 items-center justify-center rounded-md bg-orange-500  px-5 text-sm font-semibold text-white transition-colors hover:bg-[#c2410c]"
@@ -210,6 +212,8 @@ function getAdditionalDetails(job: JobCardData): Array<{ label: string; value: s
     'createdAt',
     'created',
     'source',
+    'sourceUrl',
+    'source_url',
     'applyUrl',
     'apply_url',
     'location',

@@ -211,13 +211,13 @@ export default function JobsPage() {
                         >
                           <Edit2 size={18} />
                         </button>
-                        {job.source === 'EXTERNAL' && job.source_url ? (
+                        {job.source_url || job.applyUrl || job.apply_url ? (
                           <a
-                            href={job.source_url}
+                            href={job.source_url || job.applyUrl || job.apply_url}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="rounded-lg p-2 text-[rgb(249,153,28)] transition-colors hover:bg-[rgb(249,153,28)]/20"
-                            title="Voir l'offre externe"
+                            title="Voir l'offre"
                           >
                             <Eye size={18} />
                           </a>

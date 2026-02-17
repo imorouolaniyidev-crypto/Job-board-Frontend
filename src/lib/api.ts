@@ -758,6 +758,8 @@ export const adminApi = {
 };
 
 function toAdminJobPayload(data: Partial<Job>): Record<string, unknown> {
+  const sourceUrl = normalizeSourceUrlForRequest(data);
+
   return {
     title: data.title,
     companyName: data.companyName || data.company_name || data.company,
@@ -766,8 +768,23 @@ function toAdminJobPayload(data: Partial<Job>): Record<string, unknown> {
     location: data.location,
     type: data.type,
     source: normalizeJobSourceForRequest(data.source),
+    sourceUrl,
     isActive: data.is_active,
   };
+}
+
+function normalizeSourceUrlForRequest(data: Partial<Job>): string | null | undefined {
+  const sourceUrlCandidate =
+    data.source_url ??
+    (data as { sourceUrl?: unknown }).sourceUrl ??
+    data.apply_url ??
+    data.applyUrl;
+
+  if (sourceUrlCandidate === undefined) return undefined;
+  if (sourceUrlCandidate === null) return null;
+
+  const trimmed = String(sourceUrlCandidate).trim();
+  return trimmed ? trimmed : null;
 }
 
 function normalizeJobSourceForRequest(source: unknown): 'INTERNAL' | 'EXTERNAL' | undefined {
@@ -790,6 +807,16 @@ function normalizeJobTypeForResponse(type: unknown): Job['type'] {
 }
 
 function normalizeAdminJob(payload: Record<string, unknown>): Job {
+  const sourceUrlRaw =
+    payload.sourceUrl ??
+    payload.source_url ??
+    payload.applyUrl ??
+    payload.apply_url;
+  const sourceUrl =
+    typeof sourceUrlRaw === 'string' && sourceUrlRaw.trim()
+      ? sourceUrlRaw.trim()
+      : undefined;
+
   return {
     id: String(payload.id ?? ''),
     title: String(payload.title ?? ''),
@@ -799,6 +826,9 @@ function normalizeAdminJob(payload: Record<string, unknown>): Job {
     description: String(payload.description ?? ''),
     location: String(payload.location ?? '') || undefined,
     source: normalizeJobSourceForResponse(payload.source),
+    source_url: sourceUrl,
+    applyUrl: sourceUrl,
+    apply_url: sourceUrl,
     type: normalizeJobTypeForResponse(payload.type),
     is_active: Boolean(payload.isActive ?? payload.is_active ?? true),
     createdAt: String(payload.createdAt ?? payload.created_at ?? new Date().toISOString()),

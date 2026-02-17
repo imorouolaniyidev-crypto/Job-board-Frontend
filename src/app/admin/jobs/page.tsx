@@ -74,20 +74,20 @@ export default function JobsPage() {
   };
 
   if (isLoading) {
-    return <div className="p-8 text-[rgb(18,51,119)]/75">Chargement des offres...</div>;
+    return <div className="p-4 text-[rgb(18,51,119)]/75 sm:p-6 lg:p-8">Chargement des offres...</div>;
   }
 
   if (error) {
     return (
-      <div className="p-8 text-[rgb(249,153,28)]">
+      <div className="p-4 text-[rgb(249,153,28)] sm:p-6 lg:p-8">
         {error instanceof Error ? error.message : 'Impossible de charger les offres.'}
       </div>
     );
   }
 
   return (
-    <div className="h-full overflow-auto bg-gradient-to-br from-white to-[rgb(18,51,119)]/10 p-8">
-      <div className="mb-8 flex items-center justify-between">
+    <div className="h-full overflow-auto bg-gradient-to-br from-white to-[rgb(18,51,119)]/10 p-4 sm:p-6 lg:p-8">
+      <div className="mb-8 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
         <div>
           <h1 className="mb-2 text-3xl font-bold text-[rgb(18,51,119)]">Offres d&apos;emploi</h1>
           <p className="text-[rgb(18,51,119)]/75">Gerez toutes vos offres d&apos;emploi</p>
@@ -95,7 +95,7 @@ export default function JobsPage() {
 
         <button
           onClick={() => setJobModal({ type: 'create' })}
-          className="flex items-center gap-2 rounded-lg bg-[rgb(249,153,28)] px-4 py-2 text-white transition-colors hover:bg-[rgb(249,153,28)]/90"
+          className="flex w-full items-center justify-center gap-2 rounded-lg bg-[rgb(249,153,28)] px-4 py-2 text-white transition-colors hover:bg-[rgb(249,153,28)]/90 sm:w-auto"
         >
           <Plus size={20} />
           Creer une offre

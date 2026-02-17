@@ -55,23 +55,23 @@ export default function CVUploadSection({
       <h3 className="text-lg font-semibold text-gray-900">CV (PDF)</h3>
 
       {displayName ? (
-        <div className="flex items-center justify-between rounded-lg border border-blue-200 bg-blue-50 p-4">
-          <div className="flex items-center gap-3">
+        <div className="flex flex-col gap-3 rounded-lg border border-blue-200 bg-blue-50 p-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex min-w-0 items-center gap-3">
             <File className="h-6 w-6 text-blue-600" />
-            <div>
-              <p className="font-medium text-gray-900">{displayName}</p>
+            <div className="min-w-0">
+              <p className="truncate font-medium text-gray-900">{displayName}</p>
               <p className="text-xs text-gray-600">
                 {pendingFileName ? 'Fichier en attente d\'envoi' : 'CV actuel'}
               </p>
             </div>
           </div>
-          <div className="flex gap-2">
+          <div className="flex w-full gap-2 sm:w-auto">
             {displayUrl ? (
               <a
                 href={displayUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="rounded-lg bg-blue-600 px-3 py-2 text-sm text-white transition-colors hover:bg-blue-700"
+                className="flex-1 rounded-lg bg-blue-600 px-3 py-2 text-center text-sm text-white transition-colors hover:bg-blue-700 sm:flex-none"
               >
                 Voir
               </a>
@@ -82,7 +82,7 @@ export default function CVUploadSection({
                   onDelete();
                   toast.success('CV supprime');
                 }}
-                className="flex items-center gap-2 rounded-lg bg-red-100 px-3 py-2 text-sm text-red-600 transition-colors hover:bg-red-200"
+                className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-red-100 px-3 py-2 text-sm text-red-600 transition-colors hover:bg-red-200 sm:flex-none"
               >
                 <X className="h-4 w-4" />
                 Supprimer

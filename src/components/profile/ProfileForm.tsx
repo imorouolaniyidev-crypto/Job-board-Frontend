@@ -258,12 +258,12 @@ export default function ProfileForm({ initialData = defaultUserProfile, onSave }
         ) : null}
       </div>
 
-      <div className="flex justify-end gap-3">
+      <div className="flex flex-col-reverse justify-end gap-3 sm:flex-row">
         <button
           type="button"
           onClick={handleReset}
           disabled={isSaving || !isDirty}
-          className="flex items-center gap-2 rounded-lg border border-gray-300 px-6 py-2 text-gray-700 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+          className="flex w-full items-center justify-center gap-2 rounded-lg border border-gray-300 px-6 py-2 text-gray-700 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
         >
           <X className="h-4 w-4" />
           Annuler
@@ -271,7 +271,7 @@ export default function ProfileForm({ initialData = defaultUserProfile, onSave }
         <button
           type="submit"
           disabled={isSaving || !isDirty}
-          className="flex items-center gap-2 rounded-lg bg-blue-600 px-6 py-2 text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+          className="flex w-full items-center justify-center gap-2 rounded-lg bg-blue-600 px-6 py-2 text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
         >
           <Save className="h-4 w-4" />
           {isSaving ? 'Sauvegarde...' : 'Sauvegarder'}

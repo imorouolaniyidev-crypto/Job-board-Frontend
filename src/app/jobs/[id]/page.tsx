@@ -43,9 +43,9 @@ export default async function JobDetail({
   }
 
   return (
-    <main className="container mx-auto p-6">
-      <div className="bg-card p-6 rounded-lg shadow-sm">
-        <h1 className="text-2xl font-bold mb-2">{job.title}</h1>
+    <main className="container mx-auto px-4 py-6 sm:px-6">
+      <div className="rounded-lg bg-card p-4 shadow-sm sm:p-6">
+        <h1 className="mb-2 text-xl font-bold sm:text-2xl">{job.title}</h1>
         <div className="text-sm text-muted-foreground mb-4">
           {getCompanyName(job)} - {job.location} - {getJobType(job)}
         </div>

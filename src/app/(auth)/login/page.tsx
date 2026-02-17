@@ -13,6 +13,7 @@ import { toast } from 'sonner';
 import axios from 'axios';
 import { Briefcase, Home, LogIn, Users, UserCircle } from 'lucide-react';
 import ProfileDropdown from '@/components/navbar/ProfileDropdown';
+import UserMobileMenu from '@/components/navbar/UserMobileMenu';
 
 type AuthUser = { id: string; email: string; role: 'ADMIN' | 'CANDIDATE' };
 
@@ -88,15 +89,16 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-slate-100">
       <nav className="sticky top-0 z-50 bg-white/95 shadow backdrop-blur">
-        <div className="container mx-auto flex items-center justify-between p-4">
+        <div className="container mx-auto flex flex-wrap items-center justify-between gap-3 px-4 py-3">
           <img
             src="/JobBooster-Enterprises-ENG-FullColor.png"
             width={200}
             height={50}
-            className="object-contain"
+            className="h-10 w-auto object-contain sm:h-11"
             alt="logo_job-booster"
           />
-          <ul className="flex items-center space-x-5 text-base font-semibold text-[#0a1530] md:text-[17px]">
+          <UserMobileMenu isAuthenticated={user?.role === 'CANDIDATE'} />
+          <ul className="hidden w-full items-center gap-x-4 gap-y-2 overflow-x-auto pb-1 text-sm font-semibold text-[#0a1530] sm:flex sm:w-auto sm:text-base md:text-[17px]">
             <Link href="/" className="flex cursor-pointer items-center gap-1.5 hover:underline">
               <Home size={16} />
               Accueil
@@ -120,7 +122,6 @@ export default function LoginPage() {
           </ul>
         </div>
       </nav>
-
       <main className="container mx-auto grid min-h-[calc(100vh-88px)] place-items-center p-4">
         <Card className="w-full max-w-md border-slate-200 shadow-xl">
           <CardHeader className="space-y-2 text-center">

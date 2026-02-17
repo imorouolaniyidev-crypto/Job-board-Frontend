@@ -16,6 +16,7 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { useAuthStore } from "@/lib/store";
 import ProfileDropdown from "@/components/navbar/ProfileDropdown";
+import UserMobileMenu from "@/components/navbar/UserMobileMenu";
 import { candidatesApi } from "@/lib/api";
 
 export default function CandidatesPage() {
@@ -92,15 +93,16 @@ export default function CandidatesPage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-slate-100">
       <nav className="sticky top-0 z-50 bg-white/95 shadow backdrop-blur">
-        <div className="container mx-auto flex items-center justify-between p-4">
+        <div className="container mx-auto flex flex-wrap items-center justify-between gap-3 px-4 py-3">
           <img
             src="/JobBooster-Enterprises-ENG-FullColor.png"
             width={200}
             height={50}
-            className="object-contain"
+            className="h-10 w-auto object-contain sm:h-11"
             alt="logo_job-booster"
           />
-          <ul className="flex items-center space-x-5 text-base font-semibold text-[#0a1530] md:text-[17px]">
+          <UserMobileMenu isAuthenticated={!isCheckingAuth && user?.role === "CANDIDATE"} />
+          <ul className="hidden w-full items-center gap-x-4 gap-y-2 overflow-x-auto pb-1 text-sm font-semibold text-[#0a1530] sm:flex sm:w-auto sm:text-base md:text-[17px]">
             <Link href="/" className="flex cursor-pointer items-center gap-1.5 hover:underline">
               <Home size={16} />
               Accueil
@@ -125,15 +127,15 @@ export default function CandidatesPage() {
         </div>
       </nav>
 
-      <main className="container mx-auto p-6 pt-8">
-        <div className="mb-8 overflow-hidden rounded-2xl bg-[#2c3e6e] px-8 py-10 text-white shadow-lg">
+      <main className="container mx-auto px-4 pb-6 pt-6 sm:px-6 sm:pt-8">
+        <div className="mb-8 overflow-hidden rounded-2xl bg-[#2c3e6e] px-4 py-8 text-white shadow-lg sm:px-8 sm:py-10">
           <div className="mx-auto max-w-3xl text-center">
             <h1 className="mb-3 text-3xl font-bold md:text-4xl">Decouvrez les profils candidats</h1>
             <p className="text-sm opacity-90 md:text-base">
               Filtrez rapidement les profils et contactez directement les talents disponibles.
             </p>
           </div>
-          <div className="mt-6 flex items-center justify-center gap-3">
+          <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
             <span className="rounded-full bg-white/15 px-3 py-1 text-xs md:text-sm">
               {stats.total} profils
             </span>
@@ -146,7 +148,7 @@ export default function CandidatesPage() {
           </div>
         </div>
 
-        <div className="mb-6 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+        <div className="mb-6 rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
           <h2 className="mb-4 flex items-center gap-2 text-lg font-semibold text-slate-800">
             <Filter size={18} />
             Recherche rapide
@@ -188,7 +190,7 @@ export default function CandidatesPage() {
             </select>
           </div>
 
-          <div className="mt-3 flex items-center justify-end gap-2">
+          <div className="mt-3 flex flex-wrap items-center justify-end gap-2">
             <SlidersHorizontal size={16} className="text-slate-500" />
             <select
               value={sort}
@@ -248,7 +250,7 @@ export default function CandidatesPage() {
                       {candidate.skills?.length ? candidate.skills.join(", ") : "Non renseignees"}
                     </p>
 
-                    <p className="mb-4 inline-flex items-center gap-2 text-sm text-slate-700">
+                    <p className="mb-4 inline-flex max-w-full items-center gap-2 break-all text-sm text-slate-700">
                       <Mail size={14} />
                       {candidate.email}
                     </p>

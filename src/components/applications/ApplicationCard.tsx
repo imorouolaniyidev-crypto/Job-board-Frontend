@@ -65,9 +65,9 @@ export default function ApplicationCard({ application }: ApplicationCardProps) {
             <div className="flex-1">
               <h3 className="text-xl font-semibold text-gray-900">{application.job_title}</h3>
 
-              <div className="flex items-center gap-2 text-gray-600 mt-1">
+              <div className="mt-1 flex items-center gap-2 text-gray-600">
                 <Building2 className="h-4 w-4" />
-                <span className="text-sm">{application.company_name}</span>
+                <span className="text-sm break-words">{application.company_name}</span>
               </div>
 
               <div className="flex items-center gap-2 text-gray-600 mt-1">

@@ -47,19 +47,19 @@ export default function CandidatesPage() {
   }, [error, router]);
 
   if (isLoading) {
-    return <div className="p-8 text-[rgb(18,51,119)]/75">Chargement des candidats...</div>;
+    return <div className="p-4 text-[rgb(18,51,119)]/75 sm:p-6 lg:p-8">Chargement des candidats...</div>;
   }
 
   if (error) {
     return (
-      <div className="p-8 text-[rgb(249,153,28)]">
+      <div className="p-4 text-[rgb(249,153,28)] sm:p-6 lg:p-8">
         {error instanceof Error ? error.message : 'Impossible de charger les candidats.'}
       </div>
     );
   }
 
   return (
-    <div className="space-y-6 bg-gradient-to-br from-white to-[rgb(18,51,119)]/10 p-8">
+    <div className="space-y-6 bg-gradient-to-br from-white to-[rgb(18,51,119)]/10 p-4 sm:p-6 lg:p-8">
       <div className="flex items-center gap-3">
         <div className="rounded-lg bg-[rgb(18,51,119)]/10 p-2">
           <Users className="h-6 w-6 text-[rgb(18,51,119)]" />
@@ -105,7 +105,7 @@ export default function CandidatesPage() {
         placeholder="Rechercher par nom, email..."
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
-        className="max-w-sm"
+        className="w-full max-w-sm"
       />
 
       <Card className="overflow-x-auto border-[rgb(18,51,119)]/20">

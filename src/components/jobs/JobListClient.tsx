@@ -183,14 +183,14 @@ export default function JobListClient({
       </aside>
 
       <section>
-        <div className="mb-4 flex items-center justify-between">
+        <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h2 className="text-lg font-semibold">
               {filteredJobs.length} Job disponible{filteredJobs.length > 1 ? 's' : ''}
             </h2>
             <p className="text-sm text-muted-foreground">Trouvez une opportunite qui vous correspond</p>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-3">
             <label className="text-sm text-muted-foreground">Trier :</label>
             <select
               value={sort}

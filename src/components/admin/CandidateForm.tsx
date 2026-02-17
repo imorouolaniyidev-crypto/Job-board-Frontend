@@ -123,7 +123,7 @@ export default function CandidateForm({ candidate, onSave, onCancel }: Candidate
             <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3">
               Informations personnelles
             </h3>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div>
                 <Label htmlFor="firstName">Prénom *</Label>
                 <Input
@@ -247,7 +247,7 @@ export default function CandidateForm({ candidate, onSave, onCancel }: Candidate
           </div>
 
           {/* Actions */}
-          <div className="flex gap-3 pt-4">
+          <div className="flex flex-col gap-3 pt-4 sm:flex-row">
             <Button
               type="button"
               variant="outline"

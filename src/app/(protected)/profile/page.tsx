@@ -51,7 +51,7 @@ export default function ProfilePage() {
     <div className="min-h-screen bg-gray-50">
       <div className="border-b border-gray-200 bg-white px-4 py-6">
         <div className="container mx-auto max-w-4xl">
-          <h1 className="text-3xl font-bold text-gray-900">Mon Profil</h1>
+          <h1 className="text-2xl font-bold text-gray-900 sm:text-3xl">Mon Profil</h1>
           <p className="mt-2 text-gray-600">
             Completez votre profil pour ameliorer vos chances de candidature
           </p>

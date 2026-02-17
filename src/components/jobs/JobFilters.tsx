@@ -26,8 +26,8 @@ export default function JobFilters({ initial = { q: "", type: "", location: "" }
 				placeholder="Mots-clés, poste, compétence"
 			/>
 
-			<div className="flex gap-2">
-				<select value={filters.type} onChange={(e) => setFilters((s) => ({ ...s, type: e.target.value }))} className="border rounded px-2 py-2" aria-label="Type de contrat">
+			<div className="flex flex-col gap-2 sm:flex-row">
+				<select value={filters.type} onChange={(e) => setFilters((s) => ({ ...s, type: e.target.value }))} className="w-full rounded border px-2 py-2 sm:w-auto" aria-label="Type de contrat">
 					<option value="">Tous types</option>
 					<option value="CDI">CDI</option>
 					<option value="CDD">CDD</option>

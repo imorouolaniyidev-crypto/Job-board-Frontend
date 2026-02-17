@@ -120,7 +120,7 @@ export default function JobCard({ job }: { job: JobCardData }) {
               <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
                 <Link
                   href={`/jobs/${job.id}`}
-                  className="inline-flex h-10 items-center justify-center rounded-md border border-gray-200 bg-white px-5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
+                  className="inline-flex h-10 w-full items-center justify-center rounded-md border border-gray-200 bg-white px-5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 sm:w-auto"
                 >
                   Voir detail
                 </Link>
@@ -130,14 +130,14 @@ export default function JobCard({ job }: { job: JobCardData }) {
                     href={source}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex h-10 items-center justify-center rounded-md bg-orange-500  px-5 text-sm font-semibold text-white transition-colors hover:bg-[#c2410c]"
+                    className="inline-flex h-10 w-full items-center justify-center rounded-md bg-orange-500  px-5 text-sm font-semibold text-white transition-colors hover:bg-[#c2410c] sm:w-auto"
                   >
                     Postuler
                   </a>
                 ) : (
                   <button
                     disabled
-                    className="inline-flex h-10 cursor-not-allowed items-center justify-center rounded-md  bg-orange-500 px-5 text-sm font-semibold text-white"
+                    className="inline-flex h-10 w-full cursor-not-allowed items-center justify-center rounded-md  bg-orange-500 px-5 text-sm font-semibold text-white sm:w-auto"
                   >
                     Postuler
                   </button>

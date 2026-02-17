@@ -49,7 +49,7 @@ export default function ProfileDropdown() {
       <button
         type="button"
         onClick={() => setIsOpen((prev) => !prev)}
-        className="flex cursor-pointer items-center gap-1.5 text-base font-semibold text-[#0a1530] hover:underline md:text-[17px]"
+        className="flex cursor-pointer items-center gap-1.5 whitespace-nowrap text-sm font-semibold text-[#0a1530] hover:underline sm:text-base md:text-[17px]"
       >
         <UserCircle size={16} />
         Mon Profil
@@ -57,7 +57,7 @@ export default function ProfileDropdown() {
       </button>
 
       {isOpen ? (
-        <div className="absolute right-0 mt-2 w-40 rounded-md border border-slate-200 bg-white py-1 shadow-lg">
+        <div className="absolute right-0 mt-2 w-44 rounded-md border border-slate-200 bg-white py-1 shadow-lg">
           <Link
             href="/profile"
             className="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-50"

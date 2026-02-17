@@ -78,9 +78,9 @@ export default function JobForm({ job, onSave, onCancel }: JobFormProps) {
 
 	return (
 		<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-			<div className="w-full max-w-2xl bg-white dark:bg-gray-800 rounded-lg shadow-lg max-h-[90vh] flex flex-col">
+			<div className="flex max-h-[90vh] w-full max-w-2xl flex-col rounded-lg bg-white shadow-lg dark:bg-gray-800">
 				{/* Header */}
-				<div className="flex items-center justify-between border-b border-gray-200 dark:border-gray-700 p-6 flex-shrink-0">
+				<div className="flex flex-shrink-0 items-center justify-between border-b border-gray-200 p-4 dark:border-gray-700 sm:p-6">
 					<h2 className="text-xl font-bold text-gray-900 dark:text-white">
 						{isEdit ? '✏️ Éditer l\'offre' : '➕ Créer une nouvelle offre'}
 					</h2>
@@ -93,7 +93,7 @@ export default function JobForm({ job, onSave, onCancel }: JobFormProps) {
 				</div>
 
 				{/* Form Content - Scrollable */}
-				<form onSubmit={handleSubmit} className="p-6 space-y-5 overflow-y-auto flex-1">
+				<form onSubmit={handleSubmit} className="flex-1 space-y-5 overflow-y-auto p-4 sm:p-6">
 					{/* Titre */}
 					<div>
 						<label className="block text-sm font-medium text-gray-900 dark:text-white mb-2">
@@ -255,7 +255,7 @@ export default function JobForm({ job, onSave, onCancel }: JobFormProps) {
 				</form>
 
 				{/* Footer */}
-				<div className="flex items-center justify-end gap-3 border-t border-gray-200 dark:border-gray-700 p-6 flex-shrink-0">
+				<div className="flex flex-shrink-0 flex-col-reverse gap-3 border-t border-gray-200 p-4 dark:border-gray-700 sm:flex-row sm:items-center sm:justify-end sm:p-6">
 					<button
 						type="button"
 						onClick={onCancel}

@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Briefcase, Home, LogIn, Users } from 'lucide-react';
 import ProfileDropdown from '@/components/navbar/ProfileDropdown';
+import UserMobileMenu from '@/components/navbar/UserMobileMenu';
 
 export default function ProtectedLayout({ children }: { children: React.ReactNode }) {
   const user = useAuthStore((state) => state.user);
@@ -38,15 +39,16 @@ export default function ProtectedLayout({ children }: { children: React.ReactNod
   return (
     <div className="min-h-screen bg-gray-50">
       <nav className="sticky top-0 z-50 bg-white/95 shadow backdrop-blur">
-        <div className="container mx-auto flex items-center justify-between p-4">
+        <div className="container mx-auto flex flex-wrap items-center justify-between gap-3 px-4 py-3">
           <img
             src="/JobBooster-Enterprises-ENG-FullColor.png"
             width={200}
             height={50}
-            className="object-contain"
+            className="h-10 w-auto object-contain sm:h-11"
             alt="logo_job-booster"
           />
-          <ul className="flex items-center space-x-5 text-base font-semibold text-[#0a1530] md:text-[17px]">
+          <UserMobileMenu isAuthenticated={user?.role === 'CANDIDATE'} />
+          <ul className="hidden w-full items-center gap-x-4 gap-y-2 overflow-x-auto pb-1 text-sm font-semibold text-[#0a1530] sm:flex sm:w-auto sm:text-base md:text-[17px]">
             <Link href="/" className="flex cursor-pointer items-center gap-1.5 hover:underline">
               <Home size={16} />
               Accueil
@@ -70,8 +72,7 @@ export default function ProtectedLayout({ children }: { children: React.ReactNod
           </ul>
         </div>
       </nav>
-
-      <main className="py-8">{children}</main>
+      <main className="py-6 sm:py-8">{children}</main>
     </div>
   );
 }

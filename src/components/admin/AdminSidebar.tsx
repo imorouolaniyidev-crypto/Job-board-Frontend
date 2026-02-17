@@ -41,22 +41,22 @@ export default function AdminSidebar() {
   };
 
   return (
-    <aside className="flex min-h-screen w-64 flex-col gap-4 border-r border-[rgb(18,51,119)]/20 bg-white p-6">
+    <aside className="border-b border-[rgb(18,51,119)]/20 bg-white p-4 md:flex md:min-h-screen md:w-64 md:flex-shrink-0 md:flex-col md:border-b-0 md:border-r md:p-6">
       {/* Header */}
-      <div className="mb-8">
+      <div className="mb-4 md:mb-8">
         <Link href="/admin/dashboard" className="flex items-center gap-2">
           <img
             src="/JobBooster-Enterprises-ENG-FullColor.png"
             width={200}
             height={50}
-            className="object-contain"
+            className="h-10 w-auto object-contain"
             alt="logo_job-booster"
           />
         </Link>
       </div>
 
       {/* Menu Items */}
-      <nav className="flex-1 space-y-2">
+      <nav className="flex flex-wrap gap-2 md:flex-1 md:flex-col md:space-y-2">
         {menuItems.map((item) => {
           const Icon = item.icon;
           const active = isActive(item.href);
@@ -64,7 +64,7 @@ export default function AdminSidebar() {
             <Link
               key={item.href}
               href={item.href}
-              className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
+              className={`flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm transition-colors md:gap-3 md:px-4 md:py-3 md:text-base ${
                 active
                   ? 'bg-[rgb(18,51,119)] text-white'
                   : 'text-[rgb(18,51,119)] hover:bg-[rgb(18,51,119)]/10'
@@ -78,14 +78,16 @@ export default function AdminSidebar() {
       </nav>
 
       {/* Logout Button */}
-      <Button
-        variant="outline"
-        onClick={handleLogout}
-        className="w-full justify-start gap-3 border-[rgb(249,153,28)] text-[rgb(249,153,28)] hover:bg-[rgb(249,153,28)] hover:text-white"
-      >
-        <LogOut size={20} />
-        <span>Déconnexion</span>
-      </Button>
+      <div className="mt-3 md:mt-6">
+        <Button
+          variant="outline"
+          onClick={handleLogout}
+          className="w-full justify-start gap-3 border-[rgb(249,153,28)] text-[rgb(249,153,28)] hover:bg-[rgb(249,153,28)] hover:text-white"
+        >
+          <LogOut size={20} />
+          <span>Déconnexion</span>
+        </Button>
+      </div>
     </aside>
   );
 }

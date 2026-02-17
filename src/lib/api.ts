@@ -449,6 +449,7 @@ function normalizeCandidateEntity(payload: unknown): Candidate | null {
     confirmationStatus: normalizeConfirmationStatus(
       profileRecord.confirmationStatus ?? profileRecord.confirmation_status ?? record.confirmationStatus
     ),
+    isUnderContract: Boolean(profileRecord.isUnderContract ?? profileRecord.is_under_contract ?? false),
     createdAt: String(
       profileRecord.createdAt ??
         profileRecord.created_at ??
@@ -749,6 +750,10 @@ export const adminApi = {
 
   confirmCandidature: async (profileId: string, status: ConfirmationStatus): Promise<void> => {
     await api.patch(`/admin/candidatures/${profileId}/confirmation`, { status });
+  },
+
+  updateCandidateContractStatus: async (profileId: string, isUnderContract: boolean): Promise<void> => {
+    await api.patch(`/admin/candidatures/${profileId}/contract`, { isUnderContract });
   },
 };
 

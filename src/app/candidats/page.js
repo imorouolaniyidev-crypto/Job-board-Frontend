@@ -253,9 +253,22 @@ export default function CandidatesPage() {
                       {candidate.email}
                     </p>
 
+                    {candidate.isUnderContract !== undefined && (
+                      <div className="mb-4 rounded-lg bg-slate-50 p-3">
+                        <p className="inline-flex items-center gap-2 text-xs text-slate-700">
+                          <span className="font-semibold">Statut contrat:</span>
+                          <span className={candidate.isUnderContract ? 'text-green-600 font-semibold' : 'text-orange-600 font-semibold'}>
+                            {candidate.isUnderContract ? '✓ En contrat' : '○ Sans contrat'}
+                          </span>
+                        </p>
+                      </div>
+                    )}
+
                     {candidate.profileData && Object.keys(candidate.profileData).length > 0 ? (
                       <div className="mb-4 space-y-1 rounded-lg bg-slate-50 p-3">
-                        {Object.entries(candidate.profileData).map(([key, value]) => (
+                        {Object.entries(candidate.profileData)
+                          .filter(([key]) => key !== 'isUnderContract' && key !== 'is_under_contract')
+                          .map(([key, value]) => (
                           <p key={key} className="text-xs text-slate-700">
                             <span className="font-semibold">{prettyLabel(key)}:</span>{" "}
                             {formatValue(value)}

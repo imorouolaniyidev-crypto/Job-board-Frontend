@@ -1,19 +1,22 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
-import { Users } from 'lucide-react';
+import { Users, CheckCircle, XCircle } from 'lucide-react';
 import { adminApi } from '@/lib/api';
 import type { Candidate, CandidateStatus } from '@/lib/types';
 
 export default function CandidatesPage() {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState<CandidateStatus | 'ALL'>('ALL');
+  const [updatingContractId, setUpdatingContractId] = useState<string | null>(null);
+  const [contractError, setContractError] = useState<string | null>(null);
 
   const { data: candidates = [], isLoading, error } = useQuery({
     queryKey: ['admin-candidates'],
@@ -36,6 +39,23 @@ export default function CandidatesPage() {
     ACTIVE: candidates.filter((c) => c.status === 'ACTIVE').length,
     REVIEWING: candidates.filter((c) => c.status === 'REVIEWING').length,
     REJECTED: candidates.filter((c) => c.status === 'REJECTED').length,
+  };
+
+  const handleToggleContractStatus = async (candidateId: string, currentStatus: boolean) => {
+    try {
+      setUpdatingContractId(candidateId);
+      setContractError(null);
+      await adminApi.updateCandidateContractStatus(candidateId, !currentStatus);
+      // Invalidate and refetch candidates
+      await queryClient.invalidateQueries({ queryKey: ['admin-candidates'] });
+    } catch (err) {
+      setContractError(
+        err instanceof Error ? err.message : 'Erreur lors de la mise à jour du statut de contrat'
+      );
+      console.error('Contract status update error:', err);
+    } finally {
+      setUpdatingContractId(null);
+    }
   };
 
   useEffect(() => {
@@ -108,6 +128,12 @@ export default function CandidatesPage() {
         className="max-w-sm"
       />
 
+      {contractError && (
+        <div className="rounded-lg bg-red-50 p-4 text-sm text-red-700 border border-red-200">
+          {contractError}
+        </div>
+      )}
+
       <Card className="overflow-x-auto border-[rgb(18,51,119)]/20">
         <table className="w-full">
           <thead className="border-b border-[rgb(18,51,119)]/20 bg-[rgb(18,51,119)]/8">
@@ -117,6 +143,7 @@ export default function CandidatesPage() {
               <th className="px-4 py-3 text-left text-sm font-semibold text-[rgb(18,51,119)]">Competences</th>
               <th className="px-4 py-3 text-left text-sm font-semibold text-[rgb(18,51,119)]">Statut</th>
               <th className="px-4 py-3 text-left text-sm font-semibold text-[rgb(18,51,119)]">Confirmation</th>
+              <th className="px-4 py-3 text-left text-sm font-semibold text-[rgb(18,51,119)]">Contrat</th>
               <th className="px-4 py-3 text-left text-sm font-semibold text-[rgb(18,51,119)]">Candidatures</th>
             </tr>
           </thead>
@@ -132,12 +159,36 @@ export default function CandidatesPage() {
                 </td>
                 <td className="px-4 py-3 text-sm">{candidate.status}</td>
                 <td className="px-4 py-3 text-sm">{candidate.confirmationStatus || 'PENDING'}</td>
+                <td className="px-4 py-3 text-sm">
+                  <button
+                    onClick={() =>
+                      handleToggleContractStatus(candidate.id, candidate.isUnderContract ?? false)
+                    }
+                    disabled={updatingContractId === candidate.id}
+                    className="inline-flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors disabled:opacity-50"
+                    style={{
+                      backgroundColor: candidate.isUnderContract
+                        ? 'rgb(34, 197, 94)'
+                        : 'rgb(209, 213, 219)',
+                      color: candidate.isUnderContract ? 'white' : 'rgb(55, 65, 81)',
+                    }}
+                  >
+                    {updatingContractId === candidate.id ? (
+                      <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                    ) : candidate.isUnderContract ? (
+                      <CheckCircle className="h-4 w-4" />
+                    ) : (
+                      <XCircle className="h-4 w-4" />
+                    )}
+                    {candidate.isUnderContract ? 'En contrat' : 'Pas contrat'}
+                  </button>
+                </td>
                 <td className="px-4 py-3 text-sm">{candidate.applicationsCount || 0}</td>
               </tr>
             ))}
             {filteredCandidates.length === 0 ? (
               <tr>
-                <td colSpan={6} className="px-4 py-8 text-center text-[rgb(18,51,119)]/70">
+                <td colSpan={7} className="px-4 py-8 text-center text-[rgb(18,51,119)]/70">
                   Aucun candidat trouve
                 </td>
               </tr>

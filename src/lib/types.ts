@@ -44,6 +44,7 @@ export interface Candidate {
   profileData?: Record<string, unknown>;
   status: CandidateStatus;
   confirmationStatus?: ConfirmationStatus;
+  isUnderContract?: boolean;
   createdAt: string;
   updatedAt: string;
   applicationsCount?: number;

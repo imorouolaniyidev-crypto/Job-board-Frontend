@@ -1,17 +1,18 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { UserProfile } from '@/lib/types';
 import { defaultUserProfile } from '@/lib/mockData';
 import CVUploadSection from './CVUploadSection';
 import { toast } from 'sonner';
-import { Save, X } from 'lucide-react';
+import { Image as ImageIcon, Save, Upload, X } from 'lucide-react';
 
 interface ProfileFormProps {
   initialData?: UserProfile;
   onSave?: (
     data: UserProfile,
-    cvFile?: File | null
+    cvFile?: File | null,
+    photoFile?: File | null
   ) => void | UserProfile | Promise<void | UserProfile>;
 }
 
@@ -21,6 +22,20 @@ export default function ProfileForm({ initialData = defaultUserProfile, onSave }
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isDirty, setIsDirty] = useState(false);
   const [cvFile, setCvFile] = useState<File | null>(null);
+  const [photoFile, setPhotoFile] = useState<File | null>(null);
+  const photoInputRef = useRef<HTMLInputElement>(null);
+  const photoPreviewUrl = useMemo(() => {
+    if (photoFile) return URL.createObjectURL(photoFile);
+    return formData.photo_url;
+  }, [photoFile, formData.photo_url]);
+
+  useEffect(() => {
+    return () => {
+      if (photoPreviewUrl && photoPreviewUrl.startsWith('blob:')) {
+        URL.revokeObjectURL(photoPreviewUrl);
+      }
+    };
+  }, [photoPreviewUrl]);
 
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {};
@@ -78,6 +93,35 @@ export default function ProfileForm({ initialData = defaultUserProfile, onSave }
     setIsDirty(true);
   };
 
+  const handlePhotoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      toast.error('Veuillez selectionner une image valide');
+      event.target.value = '';
+      return;
+    }
+
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error('La photo depasse 2MB');
+      event.target.value = '';
+      return;
+    }
+
+    setPhotoFile(file);
+    setIsDirty(true);
+    toast.success('Photo selectionnee');
+  };
+
+  const handlePhotoDelete = () => {
+    setPhotoFile(null);
+    if (photoInputRef.current) {
+      photoInputRef.current.value = '';
+    }
+    setIsDirty(true);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -88,7 +132,7 @@ export default function ProfileForm({ initialData = defaultUserProfile, onSave }
 
     setIsSaving(true);
     try {
-      const savedData = await onSave?.(formData, cvFile);
+      const savedData = await onSave?.(formData, cvFile, photoFile);
       if (savedData) {
         setFormData((prev) => ({
           ...prev,
@@ -97,6 +141,7 @@ export default function ProfileForm({ initialData = defaultUserProfile, onSave }
         }));
       }
       setCvFile(null);
+      setPhotoFile(null);
       setIsDirty(false);
       toast.success('Profil sauvegarde avec succes');
     } catch (err) {
@@ -110,8 +155,12 @@ export default function ProfileForm({ initialData = defaultUserProfile, onSave }
   const handleReset = () => {
     setFormData(initialData);
     setCvFile(null);
+    setPhotoFile(null);
     setIsDirty(false);
     setErrors({});
+    if (photoInputRef.current) {
+      photoInputRef.current.value = '';
+    }
     toast.info('Formulaire reinitialise');
   };
 
@@ -186,6 +235,67 @@ export default function ProfileForm({ initialData = defaultUserProfile, onSave }
           pendingFileName={cvFile?.name}
           onDelete={handleCVDelete}
         />
+      </div>
+
+      <div className="space-y-4 rounded-lg border border-gray-200 bg-white p-6">
+        <h3 className="text-lg font-semibold text-gray-900">Photo de profil</h3>
+
+        {photoPreviewUrl ? (
+          <div className="flex items-center justify-between rounded-lg border border-blue-200 bg-blue-50 p-4">
+            <div className="flex items-center gap-3">
+              <img
+                src={photoPreviewUrl}
+                alt="Photo de profil"
+                className="h-14 w-14 rounded-full border border-blue-200 object-cover"
+                onError={(e) => {
+                  e.currentTarget.src = '/default-avatar.png';
+                }}
+              />
+              <div>
+                <p className="font-medium text-gray-900">
+                  {photoFile?.name || formData.photo_filename || 'Photo actuelle'}
+                </p>
+                <p className="text-xs text-gray-600">
+                  {photoFile ? "Image en attente d'envoi" : 'Photo enregistree'}
+                </p>
+              </div>
+            </div>
+            {photoFile ? (
+              <button
+                type="button"
+                onClick={handlePhotoDelete}
+                className="flex items-center gap-2 rounded-lg bg-red-100 px-3 py-2 text-sm text-red-600 transition-colors hover:bg-red-200"
+              >
+                <X className="h-4 w-4" />
+                Retirer la selection
+              </button>
+            ) : null}
+          </div>
+        ) : null}
+
+        <input
+          ref={photoInputRef}
+          type="file"
+          accept="image/*"
+          onChange={handlePhotoUpload}
+          className="hidden"
+        />
+
+        <button
+          type="button"
+          onClick={() => photoInputRef.current?.click()}
+          className="w-full cursor-pointer rounded-lg border-2 border-dashed border-gray-300 p-8 text-center transition-colors hover:border-blue-500 hover:bg-blue-50"
+        >
+          {photoPreviewUrl ? (
+            <ImageIcon className="mx-auto mb-2 h-10 w-10 text-gray-400" />
+          ) : (
+            <Upload className="mx-auto mb-2 h-10 w-10 text-gray-400" />
+          )}
+          <p className="font-medium text-gray-700">
+            {photoPreviewUrl ? 'Cliquez pour remplacer la photo' : 'Cliquez pour selectionner une photo'}
+          </p>
+          <p className="mt-1 text-sm text-gray-600">Images uniquement, max 2MB</p>
+        </button>
       </div>
 
       <div className="space-y-4 rounded-lg border border-gray-200 bg-white p-6">

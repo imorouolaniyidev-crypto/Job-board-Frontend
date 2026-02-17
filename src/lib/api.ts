@@ -25,6 +25,16 @@ const apiBaseUrl =
   'http://localhost:3030/api';
 const apiOrigin = apiBaseUrl.replace(/\/api\/?$/, '');
 
+function resolveApiAssetUrl(rawValue: unknown): string | undefined {
+  const raw = String(rawValue ?? '').trim();
+  if (!raw) return undefined;
+  if (/^https?:\/\//i.test(raw)) return raw;
+  if (raw.startsWith('/')) return `${apiOrigin}${raw}`;
+  // Common backend pattern with multer/static: store filename and serve from /uploads.
+  if (!raw.includes('/')) return `${apiOrigin}/uploads/${raw}`;
+  return `${apiOrigin}/${raw}`;
+}
+
 function getStoredAuthToken(): string | null {
   if (typeof window === 'undefined') return null;
   const tokenCandidates = [
@@ -371,6 +381,14 @@ function buildProfileData(record: Record<string, unknown>, profileRecord: Record
     'cv_url',
     'cvFilename',
     'cv_filename',
+    'photo',
+    'photo_url',
+    'photoUrl',
+    'photoFilename',
+    'photo_filename',
+    'avatar',
+    'avatar_url',
+    'avatarUrl',
     'user',
     'profile',
     'password',
@@ -434,6 +452,23 @@ function normalizeCandidateEntity(payload: unknown): Candidate | null {
           .map((item) => item.trim())
           .filter(Boolean)
       : undefined;
+  const rawPhoto = String(
+    profileRecord.photo ??
+      profileRecord.photo_url ??
+      profileRecord.photoUrl ??
+      profileRecord.profile_photo ??
+      profileRecord.profilePhoto ??
+      profileRecord.profile_picture ??
+      profileRecord.profilePicture ??
+      profileRecord.image ??
+      profileRecord.image_url ??
+      profileRecord.imageUrl ??
+      profileRecord.avatar ??
+      profileRecord.avatar_url ??
+      profileRecord.avatarUrl ??
+      ''
+  );
+  const photo = resolveApiAssetUrl(rawPhoto);
 
   return {
     id,
@@ -444,6 +479,7 @@ function normalizeCandidateEntity(payload: unknown): Candidate | null {
     skills,
     experience: String(profileRecord.experience ?? profileRecord.experiences ?? '') || undefined,
     cvUrl: String(profileRecord.cvUrl ?? profileRecord.cv_url ?? profileRecord.cv ?? '') || undefined,
+    photo,
     profileData: buildProfileData(record, profileRecord),
     status: normalizeCandidateStatus(profileRecord.status ?? record.status),
     confirmationStatus: normalizeConfirmationStatus(
@@ -522,12 +558,23 @@ function normalizeUserProfilePayload(payload: unknown): UserProfile {
     : String(competencesRaw ?? '');
 
   const rawCvUrl = pickString(profile, ['cv', 'cv_url', 'cvUrl']);
-  const normalizedCvUrl =
-    rawCvUrl && /^https?:\/\//i.test(rawCvUrl)
-      ? rawCvUrl
-      : rawCvUrl
-        ? `${apiOrigin}${rawCvUrl.startsWith('/') ? '' : '/'}${rawCvUrl}`
-        : undefined;
+  const rawPhotoUrl = pickString(profile, [
+    'photo',
+    'photo_url',
+    'photoUrl',
+    'profile_photo',
+    'profilePhoto',
+    'profile_picture',
+    'profilePicture',
+    'image',
+    'image_url',
+    'imageUrl',
+    'avatar',
+    'avatar_url',
+    'avatarUrl',
+  ]);
+  const normalizedCvUrl = resolveApiAssetUrl(rawCvUrl);
+  const normalizedPhotoUrl = resolveApiAssetUrl(rawPhotoUrl);
 
   return {
     user_id: pickString(profile, ['user_id', 'userId', 'id']) || pickString(user, ['id']),
@@ -544,6 +591,9 @@ function normalizeUserProfilePayload(payload: unknown): UserProfile {
     cv_url: normalizedCvUrl,
     cv_filename:
       pickString(profile, ['cv_filename', 'cvFilename']) || undefined,
+    photo_url: normalizedPhotoUrl,
+    photo_filename:
+      pickString(profile, ['photo_filename', 'photoFilename']) || undefined,
     created_at: pickString(profile, ['created_at', 'createdAt']) || undefined,
     updated_at: pickString(profile, ['updated_at', 'updatedAt']) || undefined,
   };
@@ -576,6 +626,8 @@ function mergeUserProfile(
     competences: primary.competences || secondary.competences || '',
     cv_url: primary.cv_url || secondary.cv_url,
     cv_filename: primary.cv_filename || secondary.cv_filename,
+    photo_url: primary.photo_url || secondary.photo_url,
+    photo_filename: primary.photo_filename || secondary.photo_filename,
     created_at: primary.created_at || secondary.created_at,
     updated_at: primary.updated_at || secondary.updated_at,
   };
@@ -662,6 +714,8 @@ export const profileApi = {
           competences: '',
           cv_url: undefined,
           cv_filename: undefined,
+          photo_url: undefined,
+          photo_filename: undefined,
           created_at: undefined,
           updated_at: undefined,
         };
@@ -669,7 +723,7 @@ export const profileApi = {
       throw error;
     }
   },
-  updateMyProfile: async (payload: UserProfile, cvFile?: File): Promise<UserProfile> => {
+  updateMyProfile: async (payload: UserProfile, cvFile?: File, photoFile?: File): Promise<UserProfile> => {
     const formData = new FormData();
     formData.append('firstName', payload.first_name);
     formData.append('lastName', payload.last_name);
@@ -678,6 +732,7 @@ export const profileApi = {
     if (payload.formations) formData.append('formation', payload.formations);
     if (payload.experiences) formData.append('experiences', payload.experiences);
     if (cvFile) formData.append('cv', cvFile);
+    if (photoFile) formData.append('photo', photoFile);
 
     const response = await api.post('/profile', formData, {
       headers: { 'Content-Type': 'multipart/form-data' },

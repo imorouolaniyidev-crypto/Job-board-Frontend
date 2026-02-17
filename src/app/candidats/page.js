@@ -235,29 +235,72 @@ export default function CandidatesPage() {
                     className="rounded-xl border border-slate-100 bg-white p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-lg"
                   >
                     <div className="mb-3 flex items-start justify-between">
+        
+                      <img
+                        src={candidate.photo}
+                        alt={`${candidate.firstName} ${candidate.lastName}`}
+                        className="h-12 w-12 rounded-full object-cover"
+                        onError={(e) => {
+                          e.currentTarget.src = "/default-avatar.png";
+                        }}
+                      />
+                    </div>
+
+                      <div className="mb-3 flex items-start justify-between">
                       <h3 className="text-lg font-bold text-slate-800">
                         {candidate.firstName} {candidate.lastName}
                       </h3>
                       <span className={statusClass(candidate.status)}>{statusLabel(candidate.status)}</span>
                     </div>
 
-                    <p className="mb-3 text-sm text-slate-700">
+                    <div className="mb-3 text-sm text-slate-700">
                       <span className="mb-1 inline-flex items-center gap-1.5 font-semibold">
                         <UserRound size={14} />
                         Competences
                       </span>
-                      <br />
-                      {candidate.skills?.length ? candidate.skills.join(", ") : "Non renseignees"}
-                    </p>
+                      {candidate.skills?.length ? (
+                        <div className="mt-1 flex flex-wrap gap-1.5">
+                          {candidate.skills.slice(0, 4).map((skill) => (
+                            <span
+                              key={`${candidate.id}-${skill}`}
+                              className="max-w-[500px] truncate rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-700"
+                              title={skill}
+                            >
+                              {skill}
+                            </span>
+                          ))}
+                          {candidate.skills.length > 4 ? (
+                            <span className="rounded-full bg-slate-200 px-2 py-0.5 text-xs font-semibold text-slate-700">
+                              +{candidate.skills.length - 4}
+                            </span>
+                          ) : null}
+                        </div>
+                      ) : (
+                        <p className="mt-1">Non renseignees</p>
+                      )}
+                    </div>
 
                     <p className="mb-4 inline-flex max-w-full items-center gap-2 break-all text-sm text-slate-700">
                       <Mail size={14} />
                       {candidate.email}
                     </p>
 
+                    {candidate.isUnderContract !== undefined && (
+                      <div className="mb-4 rounded-lg bg-slate-50 p-3">
+                        <p className="inline-flex items-center gap-2 text-xs text-slate-700">
+                          <span className="font-semibold">Statut contrat:</span>
+                          <span className={candidate.isUnderContract ? 'text-green-600 font-semibold' : 'text-orange-600 font-semibold'}>
+                            {candidate.isUnderContract ? '✓ En contrat' : '○ Sans contrat'}
+                          </span>
+                        </p>
+                      </div>
+                    )}
+
                     {candidate.profileData && Object.keys(candidate.profileData).length > 0 ? (
                       <div className="mb-4 space-y-1 rounded-lg bg-slate-50 p-3">
-                        {Object.entries(candidate.profileData).map(([key, value]) => (
+                        {Object.entries(candidate.profileData)
+                          .filter(([key]) => key !== 'isUnderContract' && key !== 'is_under_contract')
+                          .map(([key, value]) => (
                           <p key={key} className="text-xs text-slate-700">
                             <span className="font-semibold">{prettyLabel(key)}:</span>{" "}
                             {formatValue(value)}

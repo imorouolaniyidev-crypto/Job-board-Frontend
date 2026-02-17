@@ -56,4 +56,6 @@ export const defaultUserProfile = {
   competences: '',
   cv_url: undefined,
   cv_filename: undefined,
+  photo_url: undefined,
+  photo_filename: undefined,
 };

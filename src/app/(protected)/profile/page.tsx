@@ -33,16 +33,20 @@ export default function ProfilePage() {
   };
 
   const saveMutation = useMutation({
-    mutationFn: (vars: { payload: UserProfile; cvFile?: File | null }) =>
-      profileApi.updateMyProfile(vars.payload, vars.cvFile ?? undefined),
+    mutationFn: (vars: { payload: UserProfile; cvFile?: File | null; photoFile?: File | null }) =>
+      profileApi.updateMyProfile(vars.payload, vars.cvFile ?? undefined, vars.photoFile ?? undefined),
     onSuccess: (updated) => {
       queryClient.setQueryData(['my-profile'], updated);
     },
   });
 
-  const handleSaveProfile = async (payload: UserProfile, cvFile?: File | null) => {
+  const handleSaveProfile = async (
+    payload: UserProfile,
+    cvFile?: File | null,
+    photoFile?: File | null
+  ) => {
     if (!user) return;
-    const updated = await saveMutation.mutateAsync({ payload, cvFile });
+    const updated = await saveMutation.mutateAsync({ payload, cvFile, photoFile });
     await queryClient.invalidateQueries({ queryKey: ['my-profile'] });
     return updated;
   };

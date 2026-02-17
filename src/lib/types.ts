@@ -17,6 +17,8 @@ export interface UserProfile {
   competences: string;      // Texte libre séparé par virgules
   cv_url?: string;
   cv_filename?: string;
+  photo_url?: string;
+  photo_filename?: string;
   created_at?: string;
   updated_at?: string;
 }
@@ -41,9 +43,11 @@ export interface Candidate {
   skills?: string[];
   experience?: string;
   cvUrl?: string;
+  photo?: string;
   profileData?: Record<string, unknown>;
   status: CandidateStatus;
   confirmationStatus?: ConfirmationStatus;
+  isUnderContract?: boolean;
   createdAt: string;
   updatedAt: string;
   applicationsCount?: number;

@@ -8,8 +8,8 @@ import {
   LogIn,
   Users,
   Search,
-  Mail,
   UserRound,
+  GraduationCap,
   Filter,
   SlidersHorizontal,
 } from "lucide-react";
@@ -57,13 +57,12 @@ export default function CandidatesPage() {
     const keyword = q.trim().toLowerCase();
     const list = acceptedCandidates.filter((candidate) => {
       const fullName = `${candidate.firstName || ""} ${candidate.lastName || ""}`.toLowerCase();
-      const email = String(candidate.email || "").toLowerCase();
       const skills = (candidate.skills || []).map((s) => String(s).toLowerCase());
       const status = String(candidate.status || "").toUpperCase();
 
       if (statusFilter !== "ALL" && status !== statusFilter) return false;
       if (skillFilter && !skills.includes(skillFilter.toLowerCase())) return false;
-      if (keyword && !fullName.includes(keyword) && !email.includes(keyword) && !skills.join(" ").includes(keyword)) return false;
+      if (keyword && !fullName.includes(keyword) && !skills.join(" ").includes(keyword)) return false;
       return true;
     });
 
@@ -158,7 +157,7 @@ export default function CandidatesPage() {
               <input
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
-                placeholder="Nom, email, competence..."
+                placeholder="Nom, competence..."
                 className="w-full rounded-lg border border-slate-300 py-2 pl-9 pr-3 text-sm"
               />
             </div>
@@ -227,67 +226,62 @@ export default function CandidatesPage() {
               </div>
             ) : (
               <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-                {filteredCandidates.map((candidate) => (
-                  <article
-                    key={candidate.id}
-                    className="rounded-xl border border-slate-100 bg-white p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-lg"
-                  >
-                    <div className="mb-3 flex items-start justify-between">
-                      <h3 className="text-lg font-bold text-slate-800">
-                        {candidate.firstName} {candidate.lastName}
-                      </h3>
-                      <span className={statusClass(candidate.status)}>{statusLabel(candidate.status)}</span>
-                    </div>
+                {filteredCandidates.map((candidate) => {
+                  const formation = getCandidateFormation(candidate);
 
-                    <p className="mb-3 text-sm text-slate-700">
-                      <span className="mb-1 inline-flex items-center gap-1.5 font-semibold">
-                        <UserRound size={14} />
-                        Competences
-                      </span>
-                      <br />
-                      {candidate.skills?.length ? candidate.skills.join(", ") : "Non renseignees"}
-                    </p>
-
-                    <p className="mb-4 inline-flex items-center gap-2 text-sm text-slate-700">
-                      <Mail size={14} />
-                      {candidate.email}
-                    </p>
-
-                    {candidate.isUnderContract !== undefined && (
-                      <div className="mb-4 rounded-lg bg-slate-50 p-3">
-                        <p className="inline-flex items-center gap-2 text-xs text-slate-700">
-                          <span className="font-semibold">Statut contrat:</span>
-                          <span className={candidate.isUnderContract ? 'text-green-600 font-semibold' : 'text-orange-600 font-semibold'}>
-                            {candidate.isUnderContract ? '✓ En contrat' : '○ Sans contrat'}
-                          </span>
-                        </p>
+                  return (
+                    <article
+                      key={candidate.id}
+                      className="rounded-xl border border-slate-100 bg-white p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-lg"
+                    >
+                      <div className="mb-3 flex items-start justify-between">
+                        <h3 className="text-lg font-bold text-slate-800">
+                          {candidate.firstName} {candidate.lastName}
+                        </h3>
+                        <span className={statusClass(candidate.status)}>{statusLabel(candidate.status)}</span>
                       </div>
-                    )}
 
-                    {candidate.profileData && Object.keys(candidate.profileData).length > 0 ? (
-                      <div className="mb-4 space-y-1 rounded-lg bg-slate-50 p-3">
-                        {Object.entries(candidate.profileData)
-                          .filter(([key]) => key !== 'isUnderContract' && key !== 'is_under_contract')
-                          .map(([key, value]) => (
-                          <p key={key} className="text-xs text-slate-700">
-                            <span className="font-semibold">{prettyLabel(key)}:</span>{" "}
-                            {formatValue(value)}
-                          </p>
-                        ))}
+                      <ul className="mb-5 space-y-3 text-sm leading-6 text-slate-700">
+                        <li className="flex items-start gap-3">
+                          <UserRound size={14} className="mt-0.5 text-slate-500" />
+                          <span>{candidate.skills?.length ? candidate.skills.join(", ") : "Competences non renseignees"}</span>
+                        </li>
+
+                        {formation ? (
+                          <li className="flex items-start gap-3">
+                            <GraduationCap size={14} className="mt-0.5 text-slate-500" />
+                            <span>{formation}</span>
+                          </li>
+                        ) : null}
+
+                        {candidate.isUnderContract !== undefined ? (
+                          <li className="flex items-start gap-3">
+                            <Briefcase size={14} className="mt-0.5 text-slate-500" />
+                            <span
+                              className={
+                                candidate.isUnderContract
+                                  ? "font-semibold text-green-600"
+                                  : "font-semibold text-orange-600"
+                              }
+                            >
+                              {candidate.isUnderContract ? "En contrat" : "Sans contrat"}
+                            </span>
+                          </li>
+                        ) : null}
+                      </ul>
+
+                      <div className="flex items-center justify-end">
+                        <a
+                          href={`mailto:${candidate.email}`}
+                          className="inline-block rounded-md bg-orange-500 px-4 py-2 text-sm font-medium text-white transition hover:bg-orange-600"
+                        >
+                          Contacter
+                        </a>
                       </div>
-                    ) : null}
-
-                    <div className="flex items-center justify-end">
-                      <a
-                        href={`mailto:${candidate.email}`}
-                        className="inline-block rounded-md bg-orange-500 px-4 py-2 text-sm font-medium text-white transition hover:bg-orange-600"
-                      >
-                        Contacter
-                      </a>
-                    </div>
-                  </article>
-                ))}
-              </div>
+                    </article>
+                  );
+                })}
+	              </div>
             )}
           </div>
         ) : null}
@@ -310,11 +304,15 @@ function statusClass(status) {
   return "rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700";
 }
 
-function prettyLabel(key) {
-  return key
-    .replace(/_/g, " ")
-    .replace(/([a-z])([A-Z])/g, "$1 $2")
-    .replace(/^\w/, (c) => c.toUpperCase());
+function getCandidateFormation(candidate) {
+  if (!candidate?.profileData || typeof candidate.profileData !== "object") return "";
+
+  const formationEntry = Object.entries(candidate.profileData).find(([key]) =>
+    ["formation", "formations"].includes(String(key).toLowerCase())
+  );
+
+  if (!formationEntry) return "";
+  return formatValue(formationEntry[1]);
 }
 
 function formatValue(value) {

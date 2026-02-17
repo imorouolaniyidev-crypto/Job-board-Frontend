@@ -100,11 +100,7 @@ export default function JobCard({ job }: { job: JobCardData }) {
 
           {extraDetails.length > 0 ? (
             <ul className="mb-6 list-disc space-y-1 pl-5 text-sm text-gray-700">
-              {extraDetails.map((detail) => (
-                <li key={detail.label}>
-                  <span className="font-semibold text-slate-800">{detail.label}:</span> {detail.value}
-                </li>
-              ))}
+             
             </ul>
           ) : null}
 
@@ -126,24 +122,15 @@ export default function JobCard({ job }: { job: JobCardData }) {
                 >
                   Voir detail
                 </Link>
-
-                {isValidUrl(applyLink) ? (
                   <a
-                    href={applyLink}
+                    href={job.source_url || job.sourceUrl || job.applyUrl || job.apply_url || '#'}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex h-10 items-center justify-center rounded-md bg-orange-500  px-5 text-sm font-semibold text-white transition-colors hover:bg-[#c2410c]"
                   >
                     Postuler
                   </a>
-                ) : (
-                  <button
-                    disabled
-                    className="inline-flex h-10 cursor-not-allowed items-center justify-center rounded-md  bg-orange-500 px-5 text-sm font-semibold text-white"
-                  >
-                    Postuler
-                  </button>
-                )}
+
               </div>
             </div>
           </div>
